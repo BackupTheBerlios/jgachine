@@ -29,7 +29,7 @@ RANLIB ?= ranlib
 
 
 %.o : %.java
-	$(GCJ) -c $(CXXFLAGS) $< -o $@
+	$(GCJ) -c $(GCJFLAGS) $< -o $@
 
 %.class : %.java
 	$(JAVAC) $(JAVACFLAGS) -classpath $(CLASSPATH) $<

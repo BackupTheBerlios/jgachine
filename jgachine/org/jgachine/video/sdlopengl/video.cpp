@@ -176,8 +176,8 @@ static
 void
 createWindow() 
 {
-  //  m_flags = SDL_OPENGL|SDL_RESIZABLE|SDL_FULLSCREEN;
-  m_flags = SDL_OPENGL|SDL_RESIZABLE;
+  m_flags = SDL_OPENGL|SDL_FULLSCREEN;
+  //  m_flags = SDL_OPENGL|SDL_RESIZABLE;
   SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
   resize(1024,768);
@@ -211,7 +211,7 @@ void Video::init()
 {
 #if defined(NEED_WIN32_HACK)
   // hack for mingw to replace/reproduce SDL_main stuff
-  ShowError("WinMain() error", "will do preininit now");
+  //  ShowError("WinMain() error", "will do preininit now");
   if ( SDL_Init(SDL_INIT_NOPARACHUTE) < 0 ) {
     std::string error(SDL_GetError());
     ShowError("WinMain() error", error.c_str());
