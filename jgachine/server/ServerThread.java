@@ -1,10 +1,10 @@
+package tutorial.server;
+
 import java.net.*;
 import java.io.*;
 import org.jgachine.*;
 import org.jgachine.signal.*;
 import org.jgachine.event.*;
-
-
 
 public class ServerThread extends Thread {
     protected Socket socket = null;

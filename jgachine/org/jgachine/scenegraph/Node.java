@@ -1,4 +1,4 @@
-package org.jgachine;
+package org.jgachine.scenegraph;
 
 import java.util.*;
 

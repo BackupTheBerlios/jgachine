@@ -1,42 +1,35 @@
-CXX ?= c++
-GCJ ?= gcj
-GCJH ?= gcjh
+#class path settings
+# for javac
+MYCLASSPATH = $(top_srcdir):$(top_srcdir)/vecmath
+CLASSPATH_ENV = CLASSPATH=$(MYCLASSPATH)
+# for gcj
+AM_GCJFLAGS = --classpath=$(MYCLASSPATH)
+
+# where to install classfiles
+classdir = $(pkgdatadir)/java
+
+# todo use automake detected setting
 JAVAC ?= javac
-
-export srcdir
-
-.PHONY: subdirs $(SUBDIRS)
-
-subdirs: $(SUBDIRS)
-
-$(SUBDIRS):
-	$(MAKE) -C $@
-
-LDFLAGS ?=
-# todo detect this automatically
-LIBGL ?= -lGL
-# todo this is only correct for the sdl backend
-LIBS ?= -lstdc++ -lSDL_image `sdl-config --libs` $(LIBGL)
-
-# link "mixed" executable
-LINK = $(GCJ) $(LDFLAGS)
-
-# create archive
-AR ?= ar
-
-# ranlib
-RANLIB ?= ranlib
-
-
-%.o : %.java
-	$(GCJ) -c $(GCJFLAGS) $< -o $@
+JAR ?= jar
 
 %.class : %.java
-	$(JAVAC) $(JAVACFLAGS) -classpath $(CLASSPATH) $<
+	$(JAVAC) $(JAVACFLAGS) -classpath $(MYCLASSPATH) -d $(JAVAROOT) $<
+
+# todo detect in configure.ac
+GCJH ?= gcjh
+# todo += produced warning but we want to respect the user setting - do this in configure.ac
+GCJHFLAGS=--classpath=$(top_builddir):$(top_builddir)/vecmath
 
 %.h: %.class
 	$(GCJH) $(GCJHFLAGS) $(<:.class=) -o $@
 
-clean-common:
-	rm -f *.o *.a *.so *.lo *.la *.class *~ gmon.out
-	for DIR in $(SUBDIRS);do $(MAKE) -C $$DIR clean; done
+# generate jaropt from classes variable
+jpkg = $(subst /,.,$(subdir))
+classfiles = $(foreach a,$(classes),$(subst .,/,$(jpkg).$(a)).class)
+jaropt = $(foreach a,$(classfiles),-C $(top_builddir) $(a))
+
+# todo
+%.jar: classnoinst.stamp
+	$(JAR) cvf $@ $(jaropt)
+
+jardir = $(classdir)

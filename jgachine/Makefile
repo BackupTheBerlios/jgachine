@@ -10,11 +10,9 @@ CLASSPATH+=$(srcdir):$(srcdir)/vecmath:
 # we want all submakes to inherit those variables
 export CXXFLAGS GCJFLAGS CLASSPATH
 
+
+CLASSPATH_ENV = CLASSPATH=$(top_srcdir):$(top_srcdir)/vecmath
+
+
 SUBDIRS = example server vecmath org/jgachine tutorial
-
-include $(srcdir)/Common.mk
-
-clean: clean-common
-
-
 

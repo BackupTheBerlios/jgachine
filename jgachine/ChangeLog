@@ -1,3 +1,11 @@
+2003-11-18  Jens Thiele  <karme@berlios.de>
+
+	* org/jgachine/Makefile.am binary now lowercase
+
+	* cross compilation to windows works
+
+	* use autoconf again
+
 2003-11-11  Jens Thiele  <karme@berlios.de>
 
 	* added simple pong game

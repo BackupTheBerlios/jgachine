@@ -1,9 +1,8 @@
-jgachine (java game machine)
+JGachine (Java Game machine)
 http://jgachine.berlios.de
 
-simple networked game engine for 2d multiplayer (networked) games
-
-
+JGachine is a simple networked game engine for 2d multiplayer (networked) games.
+JGachine is free software. See the file COPYING for copying permission.
 
 ********************************************************************************
 !!WARNING!!
@@ -13,7 +12,6 @@ are a -->HIGH SECURITY RISK<-- (see also TODO)
 - don't run a server available to the public
 - don't connect to untrusted servers with the client!)
 ********************************************************************************
-
 
 The Goals:
 - easy game programing for beginners
@@ -47,25 +45,25 @@ Build requirements:
 	- SDL_image:
 	  current video implementation uses SDL_image for texture loading
 
-	Server: (of course you don't have to use the included server)
+	Server: (you don't have to use the included server)
 	- some java compiler and vm (gcj and libgcj is fine - ver. 3.x)
 	  the server and the examples are pure java => any java compiler/vm should do it
 	  (currently only tested with gcj)
 
 Runtime requiremts:
 - to play games you only need the client
-  (in the moment there aren't any binaries for download)
   as the current implementation uses OpenGL - hardware acceleration is 
   (depending on the game/application) a must
 
 --------------------------------------------------------------------------------
 
 Compilation:
-
-make (perhaps set your CXXFLAGS, LDFLAGS, ...)
+(for details read INSTALL)
+./configure
+make install
 
 Running the tutorials/examples: (without server)
-
+(Perhaps set your CLASSPATH)
 org/jgachine/JGachine tutorial.pong1.Pong
 org/jgachine/JGachine tutorial.pong2.Pong
 org/jgachine/JGachine example.Example

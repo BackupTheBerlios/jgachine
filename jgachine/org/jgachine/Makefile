@@ -2,7 +2,6 @@ all: Class subdirs JGachine
 
 SUBDIRS = video input timer
 
-GCJHFLAGS+=-classpath $(CLASSPATH)
 JPACKAGE = org/jgachine
 
 include $(srcdir)/Common.mk
