@@ -90,6 +90,7 @@ AC_CONFIG_FILES([
 	tutorial/pong2/Makefile
 	tutorial/pong3/Makefile
 	tutorial/server/Makefile
+	tutorial/networked/Makefile
 	org/Makefile
 	org/jgachine/Makefile
 	org/jgachine/timer/Makefile

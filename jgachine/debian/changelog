@@ -1,3 +1,10 @@
+jgachine (0.2.0-1) unstable; urgency=low
+
+  * added example for distributed scenegraph
+  * started distributed scenegraph
+
+ --
+
 jgachine (0.1.1-1) unstable; urgency=low
 
   * improved error handling

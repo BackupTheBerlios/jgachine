@@ -17,12 +17,34 @@
 	working good enough for interactive realtime games?)
 	yes i think so
 	first step would be a simple one
-	second step would be some intelligent nodes for realtime games
+	second step would be some intelligent nodes/distribution
+	for realtime games
+	and of course the game programer can extend the client and
+	server => he can add special nodes for his game
+	(f.e. some node moving on a bezier curve ....)
+
 	simple scene graph:
 		needs way to send complete scene graph to client
 		(serialization/pickling)
-		must be able to update scene graph
-			(either transfer nodes or do somthing like rmi)
+		first improvement would be to only update partially
+		either transfer nodes or do somthing like rmi
+		in fact this is a distributed database
+		a generic aproach would be to use proxy classes
+		which update the server object as well as the client
+		object - this could be done with dynamic proxies
+		the java ones only work with interfaces which is in
+		fact the correct thing as access to member variables
+		can't be intercepted/proxied
+		unfortunately the bad thing of this is that you often
+		want to proxy classes that do not implement interfaces
+		=> create corresponding interface and derived class
+		implementing that interface :-((
+		this could also be done at runtime
+		of course this would be stupid and will not actually
+		be done but this could be the description of the process
+		"you don't actually proxy a class - you proxy a interface
+		implied by this class ;-)" 
+
 	intelligent/complex scene graph:
 		at least interpolate
 		=> moving nodes (speed, acceleration)
@@ -166,3 +188,146 @@
 was ich probieren wollte:
 der classloader auf client seite laedt die class objekte einfach
 ueber den objectstream
+
+
+
+
+grad habe ich ein synchronisationsproblem beim server
+da muss ich sowieso alles nochmal durchdenken
+und mich nochmal richtig einarbeiten wie das bei java
+funktioniert
+
+das problem ist im moment dass 2 verschiedene threads auf den stream schreiben
+bzw. eigentlich das der game thread auf den stream schreibt bevor the serverthread
+den request vom client beantwortet hat
+also meine synchron vs. asynchron geschichte
+
+this is a bug in NetResourceLoader.java
+
+
+also
+was habe ich noch gemacht
+will das letzte problem umgehen
+jetzt hätte ich es erstmal hingetrickts indem
+der server nix unaufgefordert schickt
+das wäre zum testen erstmal ganz nett aber keine lsg.
+was wären lösungen?
+- mehrere sockets (mag ich nicht)
+- stream multiplexen
+- eigentlichen fehler finden
+- vermeiden dass classloader readObject aufrufen und damit wieder einen
+  classload aufrufen kann (siehe aber auch eigentlichen fehler finden)
+  mir gefällt das nicht, daß der classloader sowas machen kann aber
+  der bug daran ist mir noch nicht klar weil ja in meinem fall eh
+  der system classloader benutzt wird - also nicht der selbe ...
+  hmmmm
+
+evtl. ist das auch ein bug in libgcj !!
+
+
+
+aber ich möchte mich jetzt glaube ich schon erstmal auf das server
+interface konzentrieren also der eigentliche netzwerkpart
+aber den reinen clientteil will ich auch nicht vernachlässigen
+also 2 schöne APIS sollen es sein für einsteiger
+einfache netzwerkspiele für die massen
+und einfache einzelspieler bzw. einzelrechner spiele
+...
+die ganzen multithread geschichten muss ich genau machen
+bisher habe ich ja das nur hingepfuscht
+
+
+okay ein problem habe ich jetzt endlich erkannt:
+ich muss eigentlich den system classloader ändern
+was eigentlich über ein property gehen sollte (laut docu)
+java.system.class.loader
+(beim gcj mit -Djava.system.class.loader=org.jgachine.MyClassLoader)
+zu setzen
+
+warum?
+da der system classloader nicht zur laufzeit gewechselt werden kann
+und dann nur objekte die mit meinem classloader geladen wurden diesen
+auch weiter verwenden
+
+anscheinend ist das im gcc 3.4 gfixt?
+nee noch nicht
+habe aber bug reported
+
+jetzt muss ich mir halt nen workaround überlegen
+zum beispiel koennte ich den ObjectInputStream über meinen ClassLoader
+laden
+das sollte gehen
+
+
+
+also
+ich ignoriere jetzt erstmal den bug
+funktioniert halt das mit dem remote laden von klassen erstmal nicht
+aber da kann ich mir immernoch einen workaround ueberlegen
+jetzt will ich erstmal das verteilte beispiel zum laufen kriegen
+momentan habe ich 2 szenegraphen
+einen fuer die serverseite einen fuer die clientseite
+im moment ist das fast nur duplizierte arbeit
+und ich muesste jetzt den einen in den anderen transformieren
+obwohl sich fast nix ändert
+das ist sehr haesslich
+auf der anderen seite können sie die beiden szenengraphen später
+durchaus sehr unterscheiden
+eine alternative waere ein abstrakter szenegraph
+und auf clientseite irgendwie ein adapter der ihn dann malt usw.
+da waere dann auch an sowas wie "glCompile" zu denken / displaylist
+
+
+also es geht voran
+jetzt muss ich aber doch das protokoll problem loesen
+das einfachste waere 2 verbindungen
+auf der einen gibt der server den ton an (client schickt nichts ungefragt)
+auf der anderen ist es umgekehrt
+
+alternativ koennte ich das aushandeln
+oder multiplexen
+
+aber bleibt da nicht noch ein problem?
+wenn ein synchroner request rausgeht
+kann kein zweiter abgesetzt werden
+das heisst wenn eine antwort reinkommt die wieder einen synchronen request
+braucht um verarbeitet zu werden gehts nicht
+beispiel?
+antwort enthält objekt einer klasse die vom server geladen werden muss
+das ist dieser richtig dumme fall den ich nicht vergessen darf
+
+am allereinfachsten wäre für diesen ganzen kram http zu benutzen
+oder halt selber einfach für solche wecke verbindung aufbauen und danach
+abbauen
+eigentlich ist das garnicht so dumm
+das geht immer mehr in richtung java applets ;-)
+das beste wäre vermutlich ein gcj java plugin zu schreiben bzw. mit dem
+typ zusammenzuarbeiten der damit angefangen hat
+und dann halt dazu eine erweiterung machen (plugin zum plugin)
+vorteile einer solchen lsg.:
+standard protokoll
+standard tools
+proxy wird gleich mitgeliefert
+weniger arbeit die ich machen müsste / mehr interesse anderer
+nachteile:
+braucht man ein webserver wobei man den natuerlich auch einfach
+in den server integrieren kann
+sicherheit
+overhead bei dem ganzen applet kram
+hmmm
+
+
+also ich habe es jetzt so gemacht
+dass ich für jeden synchronen request eine neue connection mache
+und der graph wurde zum ersten mal angezeigt !!
+
+okay
+es geht
+ObjectOutputStream.reset war wichtig !! ;-) (nicht zum ersten mal)
+nur dummerweise ist es sacklahm
+deserialisierung des einfachen szenengrafen braucht 4sec. !!
+echt übel
+entweder nach einer alternativen serialisierungsgeschichte suchen
+(habe ich schon angefangen - aber auf die schnelle nichts wirklich
+brauchbares gefunden - evtl. karmi - auf jedenfall eine gute
+problemanalyse)

@@ -137,7 +137,11 @@ anfängertauglich: ja
 wenn ich mich stark an opengl orientiere - läuft es darauf hinaus
 dass ich einen weiteren java opengl wrapper schreibe => dumm
 => erstmal schauen ob es nicht einen gibt der was taugt und
-open source ist
+open source ist:
+http://www.jausoft.com/gl4java.html
+https://jogl.dev.java.net/
+http://www.javaworld.com/javaworld/jw-05-1999/jw-05-media.html
+
 wobei naja - ich brauche ja wirklich nur ein geringes subset
 vielleicht sollte ich als erstes dieses definieren
 --------------------------------------------------------------------------------
