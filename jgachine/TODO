@@ -80,28 +80,32 @@
 		including a working gcj - for now there are only linux binaries
 		for debian/testing
 	java support of automake sucks (the non-gcj stuff)
-	debian package: for now i have 2 packages: jgachine and libjgachine
-	the libjgachine is intended to hold the class library needed to develop
-	a game (for now it includes some data files, too)
-	jgachine depends on libjgachine (is it neccessary? - everything is
-	included in the binary because it was compiled to native code
-	=> should not be neccessary)
-	=> jgachine should not depend on libjgachine - but until i remove the
-	jpong script from jgachine and libjgachine includes the java game
-	examples it is like that
-	if i change this perhaps a good idea would be:
-	jgachine (the package contains everything needed to play games)
-	jgachine-dev (contains everything needed to develop games)
-	jgachine-games (contains example games)
-	jgachine-doc (documentation)
-	but this would be overkill
-	2 packages are enough - one which is arch dependant and one which is not
+
+	debian package:
+		for now i have 2 packages: jgachine and libjgachine
+		the libjgachine is intended to hold the class library needed to develop
+		a game (for now it includes some data files, too)
+		jgachine depends on libjgachine (is it neccessary? - everything is
+		included in the binary because it was compiled to native code
+		=> should not be neccessary)
+		=> jgachine should not depend on libjgachine - but until i remove the
+		jpong script from jgachine and libjgachine includes the java game
+		examples it is like that
+		if i change this perhaps a good idea would be:
+		jgachine (the package contains everything needed to play games)
+		jgachine-dev (contains everything needed to develop games)
+		jgachine-games (contains example games)
+		jgachine-doc (documentation)
+		but this would be overkill
+		2 packages are enough - one which is arch dependant and one which is not
+		but perhaps libjgachine should really be called jgachine-dev
 	
-- signal:
+- java signal/slot:
 	at the moment only one object may be passed to a slot (signal consists of
 	one object)
 	but the server could use arrays (methods with multiple parameters 
 	=> slots with multiple objects)
+	perhaps we should use a more "standard" event system
 
 - tutorial:
 	started with a pong
