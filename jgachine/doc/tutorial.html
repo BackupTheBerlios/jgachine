@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-15">
+<title>JGachine tutorial</title>
+</head>
+
+<body>
+<h1>JGachine tutorial</h1>
+<a href="http://jgachine.berlios.de">JGachine</a> is a networked game engine for 2D multi-player (networked) games. JGachine is written in Java and C++. The games themselves are written in pure Java and can be loaded via network. (JGachine as game browser)
+<h2>Getting a java development kit</h2>
+I assume you are familar with <a href="http://dmoz.org/Computers/Programming/Languages/Java/">Java</a> or are willing to <a href="http://java.sun.com/docs/books/tutorial/getStarted/cupojava/index.html">get started</a> (<a href="http://dmoz.org/Computers/Programming/Languages/Java/FAQs,_Help,_and_Tutorials/Tutorials/Beginner_Level/">other tutorials</a>). There are <a href="http://dmoz.org/Computers/Programming/Languages/Java/Implementations/">many choices</a> for java development. Here is a mall excerpt (with focus on developing games for the JGachine):
+<UL>
+  <LI>Get <a href="http://www.gnu.org/software/gcc/java/">GNU gcc/gcj java</a> for your platform (recommended since JGachine uses it and it is free software)</LI>
+  <LI>If you are on windows <a href="http://mingw.sourceforge.net/">mingw</a> might be a good choice</LI>
+  <LI>Sun's <a href="http://java.sun.com/j2se/">Java 2 Platform, Standard Edition (J2SE)</a> SDK</LI>
+  <LI>...</LI>
+</UL>
+Write a hello world program and test it.
+<h2>Getting the JGachine and its development files</h2>
+Download <a href="http://jgachine.berlios.de">JGachine</a> for your platform.
+<h2>Setup CLASSPATH</h2>
+Your CLASSPATH must include jgachine.jar (and perhaps vecmath.jar if your java implementation does not provide javax.vecmath)
+<h2>Hello JGachine!</h2>
+Jgachine games are similar to <a href="http://java.sun.com/sfaq/#applet">java applets</a>. [todo: ...].
+We must write at least one class which implements the Runnable interface which means the class must have a <pre>void run()</pre> method.
+The Hello.java:
+<pre>
+import org.jgachine.*;
+import org.jgachine.scenegraph.*;
+
+//! all JGachine games must implement the Runnable interface
+class Hello implements Runnable
+{
+    public void run(){
+	// create scenegraph
+	Node root = (Node)new Scale(new Vector2f(64,64)).addNode(new Text("Hello JGachine!"));
+	
+	// main game loop
+	while (!JGachine.quit) {
+	    // get input
+	    JGachine.poll();
+	    // clear screen
+	    JGachine.clear();
+	    // paint scenegraph
+	    root.apply();
+	    // swap front and back buffer
+	    JGachine.swapBuffers();
+	}
+    }
+}
+</pre>
+Now let us compile the class:
+<pre>
+javac Hello.java
+</pre>
+Now let's run the game:
+<pre>
+jgachine Hello
+</pre>
+You should see "Hello JGachine!" in the lower left corner.
+<hr>
+<address></address>
+<!-- hhmts start -->Last modified: Wed Nov 19 18:08:30 CET 2003 <!-- hhmts end -->
+</body> </html>
