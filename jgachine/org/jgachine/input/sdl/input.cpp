@@ -183,7 +183,6 @@ handleDevKey(const SDL_KeyboardEvent &e, int keyDev)
     // button 1
     if (pressed) m_state.buttons|=1;
     else m_state.buttons&=~1;
-  }
   }else if (k==keys[keyDev][5]) {
     // button 1
     if (pressed) m_state.buttons|=2;
@@ -238,7 +237,7 @@ static
 void
 handleJoyButton(const SDL_JoyButtonEvent &e)
 {
-  int joy=event.which;
+  int joy=e.which;
   assert(joyDevMap);
   if ((joy<0)||(joy>=(int)joyDevMap->size())) return;
   
@@ -295,7 +294,7 @@ handleEvent(const SDL_Event &event)
       return true;
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
-      handleJoyButton(event.j//      joyButton.emit(event.jbutton);
+      handleJoyButton(event.jbutton);
       return true;
     case SDL_VIDEORESIZE:
 #ifndef NEED_RESIZE_HACK
