@@ -33,7 +33,19 @@ javasrc = \
 	scenegraph/Translate.java \
 	scenegraph/Menu.java \
 	scenegraph/Border.java \
-	scenegraph/Window.java
+	scenegraph/Window.java \
+	dscenegraph/AdjustColor.java \
+	dscenegraph/Camera.java \
+	dscenegraph/Node.java \
+	dscenegraph/Quad.java \
+	dscenegraph/Recolor.java \
+	dscenegraph/Rotate.java \
+	dscenegraph/Scale.java \
+	dscenegraph/Sprite.java \
+	dscenegraph/Text.java \
+	dscenegraph/Translate.java \
+	dscenegraph/Border.java \
+	dscenegraph/Window.java
 
 created_class = $(javasrc:.java=.class)
 
@@ -65,7 +77,7 @@ libs = \
 jgachine_LDADD = \
 	$(libs) @SDL_LIBS@ -lstdc++ -lgcj
 
-jgachine_LDFLAGS = --main=org.jgachine.JGachine
+jgachine_LDFLAGS = -Djava.system.class.loader=jgachine.org.MyClassLoader --main=org.jgachine.JGachine
 
 # todo
 jgachine.jar: $(created_class)

@@ -5,6 +5,7 @@ import java.net.*;
 import javax.vecmath.*;
 import org.jgachine.signal.*;
 import org.jgachine.event.*;
+import java.util.Hashtable;
 
 //! simple game engine
 public class JGachine {
@@ -113,6 +114,7 @@ public class JGachine {
       \todo explain how the current color is used
     */
     static public native void drawTexture(int tid);
+
     //! draws a text string with fixed width font of size 1/1
     /*!
       \param text the text
@@ -175,7 +177,21 @@ public class JGachine {
     {
 	if (!isNetAvailable()) throw new java.io.IOException("not running in networked mode");
 	objOut.writeObject(obj);
+	objOut.reset();
+	objOut.flush();
     }
+    //! send object to server and get answer object (RPC)
+    static public Object sendReceiveObject(Object obj)
+	throws java.io.IOException, java.lang.ClassNotFoundException
+    {
+	if (!isNetAvailable()) throw new java.io.IOException("not running in networked mode");
+	Socket s=new Socket(socket.getInetAddress(),socket.getPort());
+	ObjectOutputStream o = new ObjectOutputStream(s.getOutputStream());
+	ObjectInputStream i = new ObjectInputStream(s.getInputStream());
+	o.writeObject(obj);
+	return i.readObject();
+    }
+
     //! read object from server
     /*!
       \note 
@@ -189,8 +205,12 @@ public class JGachine {
 	java.lang.IllegalAccessException,
 	java.lang.reflect.InvocationTargetException
     {
+	long t1=JGachine.time();
 	Object obj = objIn.readObject();
+	long t2=JGachine.time();
 	input.dispatch(obj);
+	long t3=JGachine.time();
+	debug("deserialize: "+(t2-t1)+"usec, dispatch: "+(t3-t2)+"usec");
     }
 
     // resources
@@ -199,10 +219,12 @@ public class JGachine {
     static public int  createTexture(String resname)
 	throws java.io.IOException
     {
-	return createTexture(getResource(resname));
+	Integer iid=(Integer)textures.get(resname);
+	if (iid != null) return iid.intValue();
+	int id=createTexture(getResource(resname));
+	textures.put(resname,new Integer(id));
+	return id;
     }
-    //! create texture from resource
-    static public native int  createTexture(Resource imageData);
 
     //! get resource
     static public Resource getResource(String resname)
@@ -223,6 +245,23 @@ public class JGachine {
     static public void main(String args[]) {
 	if (runCalled) return;
 	runCalled=true;
+
+	if (System.getProperty("java.system.class.loader").equals("org.jgachine.MyClassLoader")) {
+	    // detect bug where our classloader is not the system classloader
+	    // for e.g. gcc bug #14572
+	    // TODO: find a workaround
+	    classloaderbug=!ClassLoader.getSystemClassLoader().getClass().getName().equals("org.jgachine.MyClassLoader");
+	    if (classloaderbug)
+		debug("BUG!: we can't use our ClassLoader");
+	    else
+		debug("fine - our ClassLoader is installed");
+	}
+
+	try {
+	    Class dummy = Class.forName("java.util.ArrayList");
+	}catch(Exception e){
+	    e.printStackTrace();
+	}
 
 	if ((args==null)||(args.length<1))
 	    {
@@ -252,41 +291,68 @@ public class JGachine {
 	    JGachine.deinit();
 	    return;
 	}else{
+	    System.setSecurityManager(new MySecurityManager());
+	    debug("installed security manager");
+
 	    String scheme = uri.substring(0,p);
 	    if (scheme.equals("jgachine")) {
-		debug("jgachine uri");
+		debug("jgachine uri => connect to server");
 		// this is written that stupid to show whats going on
 		String spr = uri.substring(p+"://".length());
-		debug("spr: "+spr);
+		//		debug("spr: "+spr);
 		String sp = spr.substring(0,spr.indexOf("/"));
-		debug("sp: "+sp);
+		//		debug("sp: "+sp);
 		String server = sp.substring(0,sp.indexOf(":"));
-		debug("server: "+server);
+		//		debug("server: "+server);
 		int port = new Integer(sp.substring(sp.indexOf(":")+":".length())).intValue();
-		debug("port: "+port);
+		//		debug("port: "+port);
 		String gameclass = spr.substring(spr.indexOf("/")+"/".length());
-		debug("gameclass: "+gameclass);
-		if (port<0) port=34444; // todo default port
+		//		debug("gameclass: "+gameclass);
+		if (port<0) port=34444; // todo default port - perhaps via property
 		
 		resourceLoader = new NetResourceLoader();
 		JGachine.init();
 		    
 		try {
 		    socket = new Socket(InetAddress.getByName(server),port);
+
+		    MyClassLoader loader=new MyClassLoader();
 			
-		    // order is important !!
+		    // order is important !! ?? which order and why?
 		    objOut = new ObjectOutputStream(socket.getOutputStream());
 		    objIn = new ObjectInputStream(socket.getInputStream());
+
+		    /* does not work
+		       debug("use bug workaround");
+
+		       // workaround bug
+		       // TODO: this is not a complete workaround
+		       // we only replace the classloader of our objectinputstream and not the systemclassloader
+		       Class consargs[]={InputStream.class};
+		       Class objInClass=loader.loadClass("java.io.ObjectInputStream");
+		       debug("objInClass ClassLoader: "+objInClass.getClass().getClassLoader().getClass().getName());
+		       Object parms[]={socket.getInputStream()};
+		       objIn = (java.io.ObjectInputStream)objInClass.getConstructor(consargs).newInstance(parms);
+		       debug("objIn ClassLoader: "+objIn.getClass().getClassLoader().getClass().getName());
+		    */
 			
-		    MyClassLoader loader=new MyClassLoader();
 		    Class c=loader.loadClass(gameclass);
-		    System.setSecurityManager(new MySecurityManager());
-		    debug("installed security manager");
 		    Object obj=c.newInstance();
-		    debug("calling fetched code");
+		    debug("calling fetched code (ClassLoader: "+c.getClassLoader().getClass().getName()+")");
 		    ((Runnable)obj).run();
 			
 		    socket.close();
+		}catch(java.lang.reflect.InvocationTargetException e){
+		    e.printStackTrace();
+		    Throwable wrapped=e.getCause();
+		    int depth=1;
+		    while (wrapped!=null) {
+			debug("unwrap InvocationTargetException ("+depth+")");
+			debug(wrapped.getMessage());
+			wrapped.printStackTrace();
+			wrapped=wrapped.getCause();
+			++depth;
+		    }
 		}catch(Exception e){
 		    e.printStackTrace();
 		}
@@ -309,6 +375,9 @@ public class JGachine {
 	System.out.println("JGachine.java: "+s);
     }
 
+    //! create texture from resource
+    static protected native int  createTexture(Resource imageData);
+
     static protected Socket socket;
     static protected ObjectInputStream objIn;
     static protected ObjectOutputStream objOut;
@@ -316,5 +385,7 @@ public class JGachine {
     static protected int width=0;
     static protected int height=0;
     static protected ResourceLoader resourceLoader;
+    static private boolean classloaderbug;
+    static private Hashtable textures = new Hashtable();
 }
 

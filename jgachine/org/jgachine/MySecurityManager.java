@@ -137,7 +137,7 @@ public class MySecurityManager extends SecurityManager {
     {
 	// todo this was not implemented int gcc 3.3.2 yet
 	// security hole
-	debug("checkPermission");
+	debug("checkPermission:"+perm.getName());
     }
 
     /**
