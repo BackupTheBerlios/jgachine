@@ -130,7 +130,7 @@ class Ball
 	    ddir=-ddir;
 	}
 	
-	dir+=ddir*dt*vel.length();
+	dir+=ddir*dt*vel.length()*438;
     }
 
     //! current position
