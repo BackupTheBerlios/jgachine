@@ -4,7 +4,7 @@ import javax.vecmath.*;
 import org.jgachine.*;
 
 //! adjust current color
-class AdjustColor extends Node
+public class AdjustColor extends Node
 {
     public AdjustColor(Color _c)
     {
