@@ -1,0 +1,4 @@
+optional distributed scenegraph for server side
+
+this scenegraph is used on server side and is distributed to the clients
+the clients are able to transform this scenegraph into a client side scenegraph
