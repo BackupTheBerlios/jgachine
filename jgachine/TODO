@@ -9,12 +9,10 @@
 		with a minimalistic one => the same security problems
 		again;-)
 - input: 
-	buttons
 	user definable keys
-	not only gamepad like input devices?
+	not only gamepad like input devices? (mouse? analog joy?...)
 
 - networking: 
-	flush!!
 	distributed scene graph (is it possible to do a general one
 	working good enough for interactive realtime games?)
 
@@ -28,15 +26,18 @@
 			handle manually: difficult to use
 			automatic: difficult to implement
 
-	server: make base code optinal part of jgachine?
+	server: make base code optional part of jgachine?
 		threading issues
 	NetResourceLoader:
 		todo: in the moment only one outstanding resource
 		request permitted
 
 - sound: completely missing
+	use SDL_mixer again?
 
 - video:
+	* menu:
+		just started to create simple menu
 	* better font / or better text handling in general
 	* performance: in the moment we assume hardware accelerated OpenGL 
 	  is available (premature optimization is ...)
@@ -65,6 +66,25 @@
 	* let user configure: if he wants fullscreen, resolution, bpp
 	  unfortunately there seems to be no way to simply use the current
 	  video settings with SDL (in fullscreen mode)
+	  we can fix this with some native code and support from SDL
+	  suggestion from SDL ML for x11 driver (Stephan Ferraro)
+		  SDL_SysWMinfo         info;
+		  SDL_GetWMInfo(&info);
+		  w = DisplayWidth(info.info.x11.display, 0);
+		  h = DisplayHeight(info.info.x11.display, 0);
+	* multiple lines
+	* triangles
+	* polygons (filled/textured?)
+	* circles
+	* curves? (bezier/b-spline)
+	* animations (mng? mpeg? avi? mpeg?):
+		SDL_Image does not support multiple images/animations
+		no open source pure java mng implementation available
+		perhaps use libmng directly 
+	* svg to code converter?
+
+- collision detection:
+	optional collision detection system would be nice
 
 - scenegraph:
 	perhaps it is a bad idea to use subclasses, better use interfaces?

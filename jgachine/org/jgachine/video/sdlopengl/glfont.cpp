@@ -58,20 +58,34 @@ GLFont::drawTextRow(const std::string &text, bool centered) const
   glDisable(GL_TEXTURE_2D);
 }
 
-void 
-GLFont::drawText(const std::string &text, bool centered) const
+static
+unsigned
+countRows(const std::string &text)
 {
+  unsigned res=1;
+  for (unsigned i=0;i<text.size();++i)
+    res+=text[i]=='\n' ? 1 : 0;
+  return res;
+}
+
+void 
+GLFont::drawText(const std::string &text, bool hcentered, bool vcentered) const
+{
+  if (vcentered) {
+    unsigned rows=countRows(text);
+    glTranslatef(0,float(rows)/2.0f-1.0f,0);
+  }
   std::string::size_type pos(text.find_first_of('\n'));
   if (pos!=std::string::npos) {
     std::string row(text,0,pos);
-    drawTextRow(row,centered);
+    drawTextRow(row,hcentered);
     if (pos+1<text.size()) {
       glTranslatef(0,-1,0);
-      drawText(std::string(text,pos+1),centered);
+      drawText(std::string(text,pos+1),hcentered);
     }
     return;
   }
-  drawTextRow(text,centered);
+  drawTextRow(text,hcentered);
 }
 
 int

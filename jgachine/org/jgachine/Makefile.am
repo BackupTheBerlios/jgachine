@@ -30,7 +30,10 @@ javasrc = \
 	scenegraph/Scale.java \
 	scenegraph/Sprite.java \
 	scenegraph/Text.java \
-	scenegraph/Translate.java
+	scenegraph/Translate.java \
+	scenegraph/Menu.java \
+	scenegraph/Border.java \
+	scenegraph/Window.java
 
 created_class = $(javasrc:.java=.class)
 

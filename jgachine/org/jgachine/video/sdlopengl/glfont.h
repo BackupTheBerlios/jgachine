@@ -52,7 +52,10 @@ public:
   //! draw one row of text
   void drawTextRow(const std::string &text, bool centered=false) const;
   //! draw a text - possibly multiple rows
-  void drawText(const std::string &text, bool centered=false) const;
+  /*!
+    \note this manipulates the current matrix => you have to call push and pop to keep the matrix
+  */
+  void drawText(const std::string &text, bool hcentered=false, bool vcentered=false) const;
   //! get width of one character
   int getWidth() const;
   //! get height of one character

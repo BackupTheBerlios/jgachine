@@ -15,38 +15,6 @@ import org.jgachine.scenegraph.*;
 import org.jgachine.signal.*;
 import org.jgachine.event.*;
 
-//! draw a 1x1 border
-class Border extends Node
-{
-    Border(float thickness)
-    {
-	// quad size /2
-	final float qs2=0.5f;
-	final float t2=thickness/2.0f;
-	Node quad=new Quad();
-	Node lrq=new Scale(new Vector2f(thickness,1)).addNode(quad);
-	Node left=new Translate(new Vector2f(-qs2+t2,0.0f)).addNode(lrq);
-	Node right=new Translate(new Vector2f(qs2-t2,0.0f)).addNode(lrq);
-	Node tbq=new Scale(new Vector2f(1.0f-thickness*2.0f,thickness)).addNode(quad);
-	Node top=new Translate(new Vector2f(0,qs2-t2)).addNode(tbq);
-	Node bottom=new Translate(new Vector2f(0,-qs2+t2)).addNode(tbq);
-	this.addNode(left)
-	    .addNode(right)
-	    .addNode(top)
-	    .addNode(bottom);
-    }
-}
-
-class Window extends Node
-{
-    Window(Color back, Color border, float borderWidth) {
-	final float s=1.0f-borderWidth*2.0f;
-	this.addNode(new Scale(new Vector2f(s,s)).addNode(new Recolor(back).addNode(new Quad())))
-	    .addNode(new Recolor(border).addNode(new Border(borderWidth)));
-    }
-}
-
-
 //! sprite mover
 class Mover extends Node
 {
@@ -156,10 +124,18 @@ public class Demo implements Runnable
 	int track=JGachine.createTexture("data:back.jpg");
 	Camera camera = new Camera(new Vector2f(1024/2,768/2));
 
+	List menu = (List)new ArrayList();
+	menu.add("Menu Item 1");
+	menu.add("Menu Item 2");
+	menu.add("Menu Item 3");
+	menu.add("Menu Item 4");
+	menu.add("Menu Item 5");
+
 	sceneGraph
 	    .addNode(camera.addNode(new Scale(new Vector2f(1024,1024)).addNode(new Sprite(track))))
 	    .addNode(new Translate(new Vector2f(1024/2,768/2)).addNode(new Scale(new Vector2f(80,80))
-								       .addNode(new Window(new Color(1.0f,0.0f,0.0f,0.3f),new Color(0.0f,0.0f,0.0f,1.0f), 0.04f))));
+								       .addNode(new Window(new Color(1.0f,0.0f,0.0f,0.3f),new Color(0.0f,0.0f,0.0f,1.0f), 0.04f))))
+	    .addNode(new Recolor(new Color(1.0f,0.3f,0.3f,0.7f)).addNode(new Translate(new Vector2f(11*32/2+30,5*32/2+64)).addNode(new Scale(new Vector2f(11*32,5*32)).addNode(new Menu(menu,new Color(0.0f,0.0f,0.0f,0.5f))))));
 
 	int cart=JGachine.createTexture("data:car.png");
 	for (int i=0;i<car.length;++i) {

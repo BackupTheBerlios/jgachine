@@ -6,9 +6,12 @@ import org.jgachine.*;
 public class Text extends Node
 {
     public Text(String _text) {
+	this(_text,false,false);
+    }
+    public Text(String _text, boolean hc, boolean vc) {
 	text=_text;
-	hcentered=false;
-	vcentered=false;
+	hcentered=hc;
+	vcentered=vc;
     }
     public void apply() {
 	JGachine.drawText(text,hcentered,vcentered);

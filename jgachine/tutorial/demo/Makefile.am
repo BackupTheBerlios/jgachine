@@ -3,10 +3,8 @@ source = Demo.java
 # more than one class in one java file
 # => list the classes manually 
 classes = \
-	Border	\
 	Demo	\
-	Mover	\
-	Window	
+	Mover
 
 noinst_JAVA = $(source)
 # java sources are not distributed by default with my automake version

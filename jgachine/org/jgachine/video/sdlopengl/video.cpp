@@ -462,7 +462,9 @@ void
 Video::drawText(const std::string &text, bool hcentered, bool vcentered)
 {
   assert(font);
-  font->drawText(text,hcentered);
+  pushMatrix();
+  font->drawText(text,hcentered,vcentered);
+  popMatrix();
 }
 
 void
