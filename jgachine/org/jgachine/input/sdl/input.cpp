@@ -3,6 +3,28 @@
 #include <SDL.h>
 #include <cassert>
 #include <vector>
+#include <iostream>
+
+// #define NEED_RESIZE_HACK 
+
+#ifdef NEED_RESIZE_HACK
+
+#include <list>
+
+typedef std::list<SDL_Event> EventQueue;
+EventQueue* eventQueue=NULL;
+
+static SDL_ResizeEvent expected;
+static bool expectResize=false;
+
+static
+std::ostream &operator<<(std::ostream& o, const SDL_ResizeEvent &e)
+{
+  o << e.w << "/" << e.h;
+  return o;
+}
+
+#endif
 
 // all input devices
 static std::vector<Input::DevState> *devState=NULL;
@@ -20,6 +42,11 @@ Keys keys[2]={
 void
 Input::init()
 {
+#ifdef NEED_RESIZE_HACK
+  assert(!eventQueue);
+  eventQueue=new EventQueue();
+#endif
+
   assert(!devState);
   devState=new std::vector<Input::DevState>();
   assert(!joyDevMap);
@@ -89,7 +116,7 @@ void toggleGrab()
 
 static
 bool
-handleKey(SDL_KeyboardEvent &e)
+handleKey(const SDL_KeyboardEvent &e)
 {
   bool pressed=e.state==SDL_PRESSED;
   if (!pressed) return false;
@@ -115,6 +142,8 @@ handleKey(SDL_KeyboardEvent &e)
       return true;
     }
     break;
+  default:
+    return false;
   }
   return false;
 }
@@ -122,7 +151,7 @@ handleKey(SDL_KeyboardEvent &e)
 //! \return true if it was a device key (the key was handled)  
 static
 bool
-handleDevKey(SDL_KeyboardEvent &e, int keyDev)
+handleDevKey(const SDL_KeyboardEvent &e, int keyDev)
 {
   // map keyboard dev no to real dev no
   assert((keyDev>=0)&&(keyDev<2));
@@ -203,48 +232,113 @@ void handleResize(const SDL_ResizeEvent &e)
   Input::resizeHandler(e.w,e.h);
 }
 
-
-void 
-Input::poll()
+//! handle one sdl event
+/*!
+  return true if the event should be removed from the queue false otherwise
+*/
+static
+bool
+handleEvent(const SDL_Event &event)
 {
-  SDL_Event event;
-  while ( SDL_PollEvent(&event) ) {
     switch (event.type) {
     case SDL_QUIT:
       Input::quitHandler();
-      break;
+      return true;
     case SDL_KEYDOWN:
     case SDL_KEYUP:
       if (!handleDevKey(event.key,0))
 	if (!handleDevKey(event.key,1))
 	  handleKey(event.key);
-      break;
+      return true;
     case SDL_MOUSEMOTION:
       //      mouseMotion.emit(event.motion);
-      break;
+      return true;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
       //      mouseButton.emit(event.button);
-      break;
+      return true;
     case SDL_JOYAXISMOTION:
       handleJoyMotion(event.jaxis);
-      break;
+      return true;
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
       //      joyButton.emit(event.jbutton);
-      break;
+      return true;
     case SDL_VIDEORESIZE:
+#ifndef NEED_RESIZE_HACK
       handleResize(event.resize);
-      break;
+      return true;
+#else
+      std::cerr << "got resize: "<<event.resize<<" and ";
+      if (expectResize) {
+	// we assume if we get the right size - this is the event we (unfortunately) produced
+	if ((expected.w==event.resize.w)&&(expected.h==event.resize.h)) {
+	  std::cerr << "this was the expected resize event\n";
+	  expectResize=false;
+	  return true;
+	}else{
+	  std::cerr << "this was NOT the expected resize event\n";      
+	  if (eventQueue->size()>2) {
+	    std::cerr << "since there are many events pending i stop waiting for this event - i assume it was lost\n";
+	    expectResize=false;
+	    return true;
+	  }
+	  return false;
+	}
+      }else{
+	std::cerr << "we do not expect a resize event\n";
+	handleResize(event.resize);
+	expectResize=true;
+	expected=event.resize;
+	return true;
+      }
+#endif
     default:
-      break;
+      std::cerr << "Got unknown event => we drop it\n";
+      return true;
+    }
+}
+
+
+void 
+Input::poll()
+{
+  SDL_Event event;
+
+#ifdef NEED_RESIZE_HACK
+  assert(eventQueue);
+  EventQueue::iterator it(eventQueue->begin());
+  while (it!=eventQueue->end()) {
+    if (handleEvent(*it))
+      it=eventQueue->erase(it);
+    else
+      ++it;
+  }
+  while ( SDL_PollEvent(&event) ) {
+    if (!handleEvent(event)) {
+      eventQueue->push_back(event);
     }
   }
+
+#else
+  
+  while ( SDL_PollEvent(&event) ) {
+    handleEvent(event);
+  }
+#endif
+
 }
 
 void
 Input::deinit()
 {
+#ifdef NEED_RESIZE_HACK
+  if (eventQueue){
+    delete eventQueue;
+    eventQueue=NULL;
+  }
+#endif
+
   if (devState) {
     delete devState;
     devState=NULL;
