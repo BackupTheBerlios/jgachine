@@ -114,7 +114,7 @@ handleDevKey(SDL_KeyboardEvent &e, int keyDev)
 }
 
 static
-int8_t
+signed char
 joyScale(Sint16 v) 
 {
   Sint16 clearance=20000;

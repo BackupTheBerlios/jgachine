@@ -20,10 +20,10 @@ CJC = $(GCJ) -C $(CXXFLAGS)
 LINK = $(GCJ) $(LDFLAGS)
 
 # create archive
-AR = ar cru
+AR ?= ar cru
 
 # ranlib
-RANLIB = ranlib
+RANLIB ?= ranlib
 
 
 %.o : %.java

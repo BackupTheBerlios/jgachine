@@ -15,7 +15,7 @@ public class LocalResourceLoader implements ResourceLoader
 	// todo are errors checked?
 	String resloc=resname.substring(p+1);
 	if (restype.equals("class")) {
-	    return new Resource(resname,getLocal(resloc.replace('.','/')+".class"));
+	    return new Resource(resname,getLocal(resloc.replace('.',System.getProperty("file.separator").charAt(0))+".class"));
 	}else if (restype.equals("data")){
 	    return new Resource(resname,getLocal("data/"+resloc));
 	}else{
