@@ -1,6 +1,6 @@
 all: subdirs
 
-SUBDIRS = pong
+SUBDIRS = pong1 pong2
 
 include $(srcdir)/Common.mk
 

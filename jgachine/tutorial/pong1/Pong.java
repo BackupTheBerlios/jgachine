@@ -8,8 +8,10 @@
   - a bit of physics (s=V*t)
   - scene graph concept
   - java basics
+
+  \todo: strip down even more since this should be the first lesson?
 */
-package tutorial.pong;
+package tutorial.pong1;
 
 import java.io.*;
 import java.util.*;
@@ -51,6 +53,29 @@ class RacketMover
     public float vel;
 }
 
+//! racket sprite
+/*!
+  we now have the physics of the racket right
+  but of course we must paint it
+*/
+class RacketSprite extends Node
+{
+    RacketSprite(Vector2f _pos, Color color) throws java.io.IOException
+    {
+	// load texture if not yet loaded
+	if (textureID==-1) 
+	    textureID=JGachine.createTexture("data:car.png");
+
+	pos = _pos;
+
+	this.addNode(new Translate(pos).addNode(new Scale(size).addNode(new Recolor(color).addNode(new Sprite(textureID)))));
+    }
+
+    Vector2f pos;
+
+    static int textureID=-1;
+    static Vector2f size=new Vector2f(64,64);
+}
 
 //! a ball
 /*!
@@ -88,24 +113,24 @@ class Ball
 	// check left/right out
 	if (pos.x<-1024/2) {
 	    restart();
-	    Pong1.win(1);
+	    Pong.win(1);
 	}else if (pos.x>1024/2) {
 	    restart();
-	    Pong1.win(0);
+	    Pong.win(0);
 	}
 	// check if racket hits
 	final float srx=1024/2-64-64/2;
 	final float erx=srx+64;
 	float ydiff;
-	ydiff=pos.y-Pong1.racket[0].pos.y;
+	ydiff=pos.y-Pong.racket[0].pos.y;
 	if (((pos.x>-erx)&&(pos.x<-srx)) && (Math.abs(ydiff)<32) && (vel.x<0)) {
-	    vel.x=-vel.x*(1.0f+(float)Pong1.devState[0].x/5);
+	    vel.x=-vel.x*(1.0f+(float)Pong.devState[0].x/5);
 	    vel.y+=ydiff*10;
 	    ddir=-ddir;
 	}
-	ydiff=pos.y-Pong1.racket[1].pos.y;
+	ydiff=pos.y-Pong.racket[1].pos.y;
 	if (((pos.x> srx)&&(pos.x< erx)) && (Math.abs(ydiff)<32) && (vel.x>0)) {
-	    vel.x=-vel.x*(1.0f-(float)Pong1.devState[1].x/5);
+	    vel.x=-vel.x*(1.0f-(float)Pong.devState[1].x/5);
 	    vel.y+=ydiff*10;
 	    ddir=-ddir;
 	}
@@ -127,137 +152,28 @@ class Ball
 /*!
   we now have the physics of the ball right
   but of course we must paint it
-
-  we paint a ball consisting of:
-  a ball sprite + light map + shadow
 */
 class BallSprite extends Node
 {
-    BallSprite() throws java.io.IOException
+    BallSprite(Vector2f _pos) throws java.io.IOException
     {
-	// load textures if not yet loaded
+	// load texture if not yet loaded
 	if (textureID==-1) 
 	    textureID=JGachine.createTexture("data:ball.png");
-	if (lightMapTextureID==-1) 
-	    lightMapTextureID=JGachine.createTexture("data:ball-light.png");
 
-	pos = new Vector2f();
+	pos = _pos;
 
-	// node which draws rotated and scaled sprite without shadow (the ball)
+	// node which draws rotated and scaled sprite
 	Node ball=new Translate(pos);
 	rotate = new Rotate();
-	ball.addNode(rotate.addNode(new Scale(size).addNode(new Sprite(textureID))));
-
-	// node which draws the lightmap
-	Node lightMap=new Translate(pos).addNode(new Scale(size).addNode(new Sprite(lightMapTextureID)));
-
-	// node which draws the shadow
-	Node shadow=new Translate(new Vector2f(12,-12)).addNode(new AdjustColor(new Color(0,0,0,0.3f)).addNode(ball));
-
-	// put it all together
-	this.addNode(shadow)
-	    .addNode(ball)
-	    .addNode(lightMap);
+	this.addNode(ball.addNode(rotate.addNode(new Scale(size).addNode(new Sprite(textureID)))));
     }
 
     Rotate rotate;
     Vector2f pos;
 
     static int textureID=-1;
-    static int lightMapTextureID=-1;
     static Vector2f size=new Vector2f(64,64);
-}
-
-
-//! paint blured ballsprite
-/*!
-  now lets get a bit fancy - we have a lighted ball with shadow
-  but to get a visualization for the speed and to make the animation more smooth
-  let us add a bluring effect
-
-  the idea is simply to blend old positions of the ball
-*/
-class BluredBallSprite extends Node
-{
-    BluredBallSprite() throws java.io.IOException
-    {
-	// we simply create some BallSprite objects
-	balls=new BallSprite[blured];
-	for (int i=0;i<blured;++i) {
-	    balls[i]=new BallSprite();
-	    Node node = balls[i];
-	    if (i<blured-1) {
-		// we blend all ball sprites except the last one and start with an alpha of startAlpha and fade
-		// out linear
-		final float startAlpha=0.1f;
-		node = new AdjustColor(new Color(1.0f,1.0f,1.0f,startAlpha*((float)i+1)/(blured-1) ) ).addNode(node);
-	    }
-	    addNode(node);
-	}
-    }
-    void rotateTo(float dir){
-	balls[blured-1].rotate.r=dir;
-    }
-    void moveTo(Vector2f pos){
-	for (int i=0;i<blured-1;++i)
-	    balls[i].pos.set(balls[i+1].pos);
-	balls[blured-1].pos.set(pos);
-    }
-
-    // how many sprites do we paint (try to increase or descrease it)
-    static final int blured = 6;
-    BallSprite balls[];
-}
-
-//! moveable and rotateable sprite with shadow (which is blured)
-/*!
-  \todo fix this - nearly the same as above .... 
-*/
-class ShadowedSprite extends Node
-{
-    ShadowedSprite(Node sprite,
-		   Vector2f _pos,
-		   float dir) 
-    {
-	pos=new Vector2f[blured];
-	for (int i=0;i<blured;++i) {
-	    pos[i]=new Vector2f(_pos);
-	    
-	    // node which draws rotated and scaled sprite without shadow
-	    Translate t=new Translate(pos[i]);
-	    rotate = new Rotate(dir);
-	    t.addNode(rotate.addNode(sprite));
-
-	    // node which draws a shadow (black, alpha blended sprite)
-	    AdjustColor shadow = (AdjustColor)new AdjustColor(new Color(0.0f,0.0f,0.0f,0.3f)).addNode(t);
-
-	    Node base = this;
-	    if (i<blured-1) {
-		base = new AdjustColor(new Color(1.0f,1.0f,1.0f,0.1f*((float)i+1)/(blured-1) ) );
-		addNode(base);
-	    }
-	    base
-		.addNode(new Translate(new Vector2f(6.0f,-6.0f)).addNode(shadow))
-		.addNode(new Translate(new Vector2f(12.0f,-12.0f)).addNode(shadow))
-		.addNode(t);
-	}
-    }
-    void rotateTo(float dir){
-	rotate.r=dir;
-    }
-    void moveTo(Vector2f _pos){
-	//	if ((++moved%2)==0)
-	for (int i=0;i<blured-1;++i)
-	    pos[i].set(pos[i+1]);
-	pos[blured-1].set(_pos);
-    }
-
-    // how many sprites do we paint
-    static final int blured = 8;
-
-    Rotate rotate;
-    Vector2f pos[];
-    int moved=0;
 }
 
 //! simple pong clone
@@ -266,17 +182,16 @@ class ShadowedSprite extends Node
   
   we must implement Runnable
 */
-public class Pong1 implements Runnable
+public class Pong implements Runnable
 {
-    Pong1()
+    Pong()
     {
 	// how many input devices are available?
 	int devs=JGachine.numDevices();
 	// create array holding the current state of each input device
 	devState=new DevState[devs];
-	// create 2 rackets and corresponding sprites
+	// create 2 rackets
 	racket=new RacketMover[2];
-	racketSprite=new ShadowedSprite[2];
 
 	// don't forget to initialize our input state
 	for (int i=0;i<devs;++i) {
@@ -326,13 +241,12 @@ public class Pong1 implements Runnable
 	    float r=( i   %3)!=0 ? 0.6f:1.0f;
 	    float g=((i+1)%3)!=0 ? 0.4f:1.0f;
 	    float b=((i+2)%3)!=0 ? 0.6f:1.0f;
-	    racketSprite[i]=new ShadowedSprite(new Scale(new Vector2f(64,64)).addNode(new Sprite(JGachine.createTexture("data:car.png"))),racket[i].pos,0);
-	    camera.addNode(new AdjustColor(new Color(r,g,b,1.0f)).addNode(racketSprite[i]));
+	    camera.addNode(new RacketSprite(racket[i].pos,new Color(r,g,b,1.0f)));
 	}
 
 	// add ball
 	Ball ball = new Ball();
-	BluredBallSprite ballSprite= new BluredBallSprite();
+	BallSprite ballSprite = new BallSprite(ball.pos);
 	camera.addNode(ballSprite);
 
 	// add point displays
@@ -362,14 +276,11 @@ public class Pong1 implements Runnable
 	    // get input
 	    JGachine.poll();
 	    // move rackets
-	    for (int i=0;i < racket.length;++i) {
+	    for (int i=0;i < racket.length;++i)
 		racket[i].step(fdt);
-		racketSprite[i].moveTo(racket[i].pos);
-	    }
 	    // move ball
 	    ball.step(fdt);
-	    ballSprite.rotateTo(ball.dir);
-	    ballSprite.moveTo(ball.pos);
+	    ballSprite.rotate.r=ball.dir;
 
 	    // paint
 	    sceneGraph.apply();
@@ -399,15 +310,10 @@ public class Pong1 implements Runnable
 	    averagedt=(averagedt*19+fakedt)/20;
 	    dterror+=fdt-fakedt;
 	    fdt=fakedt;
-
 	    debug("fdt: "+fdt+" error: "+dterror);
-	    // debug("mem: "+Runtime.getRuntime().freeMemory());
 
 	    // after 200 frames update the fps counter
 	    if (frame%200 == 0) {
-		//		debug("run gc");
-		//		Runtime.getRuntime().gc();
-
 		long diff = last - mark;
 		mark=last;
 		float sec=(float)diff/1000000.0f;
@@ -417,17 +323,15 @@ public class Pong1 implements Runnable
     }
 
     static protected void debug(String s){
-	//	System.out.println("Pong1.java: "+s);
+	//	System.out.println("Pong.java: "+s);
     }
 
     //! our rackets
     static RacketMover[] racket;
-    static ShadowedSprite[] racketSprite;
 
     //! state of our input devices
     static DevState[] devState;
     //! points
     static Text pointsText[];
     static int points[]={0,0};
-	
 }
