@@ -71,7 +71,8 @@ org::jgachine::JGachine::init()
   
   assert(!colorStack);
   colorStack=new ColorStack();
-  
+
+  // at the moment video must always be initialized first
   Video::init();
   Input::init();
 }

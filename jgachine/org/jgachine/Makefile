@@ -36,7 +36,7 @@ JGachine:  \
 	JGachineNative.o \
 	video/libvideo.a input/libinput.a timer/libtimer.a \
 	$(srcdir)/vecmath/vecmath.a
-	$(LINK) -o $@ $^ -lstdc++ -lSDL -lSDL_image -lGL --main=org.jgachine.JGachine
+	$(LINK) -o $@ --main=org.jgachine.JGachine $^ $(LIBS)
 
 
 JGachineNative.o:  $(created_h) JGachineNative.cpp

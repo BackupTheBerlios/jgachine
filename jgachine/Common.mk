@@ -12,15 +12,17 @@ subdirs: $(SUBDIRS)
 $(SUBDIRS):
 	$(MAKE) -C $@
 
-# compile java to native
-CJN = $(GCJ) $(CXXFLAGS) -c
-# compile java to class (bytecode)
-CJC = $(GCJ) -C $(CXXFLAGS)
+LDFLAGS ?=
+# todo detect this automatically
+LIBGL ?= -lGL
+# todo this is only correct for the sdl backend
+LIBS ?= -lstdc++ -lSDL_image `sdl-config --libs` $(LIBGL)
+
 # link "mixed" executable
 LINK = $(GCJ) $(LDFLAGS)
 
 # create archive
-AR ?= ar cru
+AR ?= ar
 
 # ranlib
 RANLIB ?= ranlib

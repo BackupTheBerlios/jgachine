@@ -8,7 +8,7 @@ all: $(created_class) vecmath.a $(created_h)
 include $(srcdir)/Common.mk
 
 vecmath.a: $(created_o)
-	$(AR) $@ $(created_o)
+	$(AR) cru $@ $(created_o)
 	$(RANLIB) $@
 
 clean: clean-common

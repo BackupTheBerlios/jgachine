@@ -6,7 +6,7 @@ cppsrc = $(wildcard *.cpp)
 obj = $(cppsrc:.cpp=.o)
 
 libtimer.a: $(obj) time.h
-	$(AR) $@ $(obj)
+	$(AR) cru $@ $(obj)
 	$(RANLIB) $@
 
 clean: clean-common

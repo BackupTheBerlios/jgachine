@@ -13,6 +13,29 @@
 #include "glfont.h"
 #include <cassert>
 
+#if defined(WIN32)
+#define NEED_WIN32_HACK 1
+#include <SDL_main.h>
+#include <windows.h>
+
+#define USE_MESSAGEBOX 1
+
+/* Show an error message */
+static 
+void ShowError(const char *title, const char *message)
+{
+/* If USE_MESSAGEBOX is defined, you need to link with user32.lib */
+#ifdef USE_MESSAGEBOX
+	MessageBox(NULL, message, title, MB_ICONEXCLAMATION|MB_OK);
+#else
+	fprintf(stderr, "%s: %s\n", title, message);
+#endif
+}
+
+#endif
+
+
+
 static int m_width;
 static int m_height;
 static unsigned m_flags;
@@ -186,6 +209,19 @@ createWindow()
 
 void Video::init()
 {
+#if defined(NEED_WIN32_HACK)
+  // hack for mingw to replace/reproduce SDL_main stuff
+  ShowError("WinMain() error", "will do preininit now");
+  if ( SDL_Init(SDL_INIT_NOPARACHUTE) < 0 ) {
+    std::string error(SDL_GetError());
+    ShowError("WinMain() error", error.c_str());
+    throw std::runtime_error(std::string("Could not preinit SDL: ")+error);
+  }
+  SDL_SetModuleHandle(GetModuleHandle(NULL));
+#endif
+
+
+
   textures=new Textures();
   std::cout << __PRETTY_FUNCTION__ << std::endl;
   if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_NOPARACHUTE) < 0 ) {

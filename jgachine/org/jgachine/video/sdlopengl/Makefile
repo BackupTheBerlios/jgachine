@@ -8,7 +8,7 @@ cppsrc = $(wildcard *.cpp)
 obj = $(cppsrc:.cpp=.o)
 
 ../libvideo.a: $(obj) ../video.h
-	$(AR) $@ $(obj)
+	$(AR) cru $@ $(obj)
 	$(RANLIB) $@
 
 clean: clean-common
