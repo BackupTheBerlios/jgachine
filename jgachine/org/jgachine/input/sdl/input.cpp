@@ -33,10 +33,10 @@ static std::vector<int> *joyDevMap=NULL;
 // map keyboard number to input device number
 int keyDevMap[2]={0,1};
 // keyboard definition
-typedef SDLKey Keys[4];
+typedef SDLKey Keys[6];
 Keys keys[2]={
-  {SDLK_KP8, SDLK_KP2, SDLK_KP4, SDLK_KP6},
-  {SDLK_w, SDLK_s, SDLK_a, SDLK_d}
+  {SDLK_KP8, SDLK_KP2, SDLK_KP4, SDLK_KP6, SDLK_KP0, SDLK_KP_PERIOD},
+  {SDLK_w, SDLK_s, SDLK_a, SDLK_d, SDLK_1, SDLK_2}
 };
 
 void
@@ -179,6 +179,15 @@ handleDevKey(const SDL_KeyboardEvent &e, int keyDev)
     // right
     if (pressed) m_state.x=1;
     else if (m_state.x==1) m_state.x=0;
+  }else if (k==keys[keyDev][4]) {
+    // button 1
+    if (pressed) m_state.buttons|=1;
+    else m_state.buttons&=~1;
+  }
+  }else if (k==keys[keyDev][5]) {
+    // button 1
+    if (pressed) m_state.buttons|=2;
+    else m_state.buttons&=~2;
   }
   if (m_state!=old) {
     Input::devStateHandler(m_state);
@@ -225,6 +234,30 @@ handleJoyMotion(const SDL_JoyAxisEvent &event)
     Input::devStateHandler(m_state);
 }
 
+static
+void
+handleJoyButton(const SDL_JoyButtonEvent &e)
+{
+  int joy=event.which;
+  assert(joyDevMap);
+  if ((joy<0)||(joy>=(int)joyDevMap->size())) return;
+  
+  int dev=(*joyDevMap)[joy];
+  assert(devState);
+  if ((dev<0)||(dev>=(int)devState->size())) return;
+  
+  Input::DevState &m_state((*devState)[dev]);
+  Input::DevState old(m_state);
+
+  if (e.state==SDL_PRESSED)
+    m_state.buttons|=1<<e.button;
+  else
+    m_state.buttons&=~(1<<e.button);
+
+  if (m_state!=old)
+    Input::devStateHandler(m_state);
+}
+
 inline
 static
 void handleResize(const SDL_ResizeEvent &e)
@@ -262,7 +295,7 @@ handleEvent(const SDL_Event &event)
       return true;
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
-      //      joyButton.emit(event.jbutton);
+      handleJoyButton(event.j//      joyButton.emit(event.jbutton);
       return true;
     case SDL_VIDEORESIZE:
 #ifndef NEED_RESIZE_HACK
