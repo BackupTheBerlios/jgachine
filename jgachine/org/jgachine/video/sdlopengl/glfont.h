@@ -47,7 +47,7 @@ public:
     \param _tilex tiles in x direction
     \param _tiley tiles in y direction
   */
-  GLFont(const DOPE_SMARTPTR<Texture> &_texPtr, int _tilex=16, int _tiley=16);
+  GLFont(const JGACHINE_SMARTPTR<Texture> &_texPtr, int _tilex=16, int _tiley=16);
 
   //! draw one row of text
   void drawTextRow(const std::string &text, bool centered=false) const;
@@ -77,7 +77,7 @@ public:
     return std::string()+char(11+num);
   }
 protected:
-  DOPE_SMARTPTR<Texture> texPtr;
+  JGACHINE_SMARTPTR<Texture> texPtr;
   int tilex;
   int tiley;
   struct Color

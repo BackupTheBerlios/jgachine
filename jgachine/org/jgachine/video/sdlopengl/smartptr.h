@@ -22,10 +22,10 @@
   \author Jens Thiele
 */
 
-#ifndef DOPE_SMARTPTR_H
-#define DOPE_SMARTPTR_H
+#ifndef JGACHINE_SMARTPTR_H
+#define JGACHINE_SMARTPTR_H
 
 #include "boost/smart_ptr.hpp"
-#define DOPE_SMARTPTR boost::shared_ptr
+#define JGACHINE_SMARTPTR boost::shared_ptr
 
 #endif

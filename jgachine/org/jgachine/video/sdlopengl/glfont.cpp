@@ -1,7 +1,7 @@
 #include "glfont.h"
 #include "texture.h"
 
-GLFont::GLFont(const DOPE_SMARTPTR<Texture> &_texPtr, int _tilex, int _tiley)
+GLFont::GLFont(const JGACHINE_SMARTPTR<Texture> &_texPtr, int _tilex, int _tiley)
   : texPtr(_texPtr), tilex(_tilex), tiley(_tiley)
 {}
 

@@ -28,44 +28,6 @@
 #include <errno.h>
 #include <iostream>
 
-#define DOPE_ERRORSTR "errno="<<errno<<":"<<strerror(errno)
-#define DOPE_FUNCTIONNAME __PRETTY_FUNCTION__
-#define DOPE_HERE __FILE__ << ":" << __LINE__ << ":" << DOPE_FUNCTIONNAME
-#define DOPE_MSG(dopeLevelP, dopeMsgP) do{std::cerr << dopeLevelP << DOPE_HERE << ": " << dopeMsgP << "(" << DOPE_ERRORSTR << ")\n";}while(0)
-
-#define DOPE_WARN(msg) DOPE_MSG("WARNING: ",msg)
-
-inline int fatal(const char *file,int line,const char *func, const char *msg) 
-{
-  std::cerr << "FATAL: " << file << ":" << line << ":" << func << ": " << msg << "(" << DOPE_ERRORSTR <<")\n";
-  std::terminate();
-  return 0;
-}
-
-/*
-  \def DOPE_STR(s)
-  \brief DOPE_STR converts the macro argument to a string constant
-*/
-#define DOPE_STR(s) #s
-
-/*
-  \def DOPE_CHECK(expr)
-  \brief DOPE_CHECK is like assert but takes also effect when NDEBUG is defined
-
-  it seems there is no assert which is not disabled by a \#define NDEBUG 
-
-*/
-#define DOPE_CHECK(expr) (static_cast<void> ((expr) ? 0 : fatal(__FILE__, __LINE__, DOPE_FUNCTIONNAME, "assertion failed: " DOPE_STR(expr))))
-//#define DOPE_CHECK(expr) (static_cast<void> (0))
-
-
-/*!
-  \def DOPE_FATAL(msg)
-  \brief fatal error - exit with a short message
-*/
-#define DOPE_FATAL(msg) do{DOPE_MSG("FATAL: ",msg);std::terminate();}while(0)
-
-
 #if defined(WINDOOF)
 // define NOMINMAX - otherwise min and max are defined as macros !
 #define NOMINMAX
@@ -85,8 +47,10 @@ inline int fatal(const char *file,int line,const char *func, const char *msg)
 #include <GL/glu.h>
 #endif
 
+#include "../../common/error.h"
+
 #define DEBUG_GL(msg)
-//#define DEBUG_GL(msg) DOPE_MSG("DEBUG: OpenGL: ", msg)
+//#define DEBUG_GL(msg) JGACHINE_MSG("DEBUG: OpenGL: ", msg)
 
 #define GL_ERRORS() do{if (printGLErrors()) std::cout << "gl error at - see above";}while(0)
 

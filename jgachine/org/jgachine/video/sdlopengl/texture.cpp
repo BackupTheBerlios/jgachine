@@ -105,9 +105,9 @@ Texture::Texture(unsigned dsize, const char* data, const char *extension, const 
     Uint32 temp, pixel;
     Uint8 alpha;
     fmt=image->format;
-    DOPE_CHECK(fmt->BytesPerPixel==4);
-    DOPE_CHECK(!fmt->Aloss);
-    DOPE_CHECK(fmt->Amask>>fmt->Ashift==255);
+    JGACHINE_CHECK(fmt->BytesPerPixel==4);
+    JGACHINE_CHECK(!fmt->Aloss);
+    JGACHINE_CHECK(fmt->Amask>>fmt->Ashift==255);
     // this is really slow - but it is not called often and
     // easy to understand
     for (int c=0;c<width*height;++c) {
@@ -144,7 +144,7 @@ Texture::Texture(unsigned dsize, const char* data, const char *extension, const 
 Texture::~Texture()
 {
   glDeleteTextures(1,&textureID);
-  DOPE_MSG("Info:","freed texture");
+  JGACHINE_MSG("Info:","freed texture");
 }
 
 SDL_Surface*
@@ -152,7 +152,7 @@ Texture::loadImage(unsigned dsize, const char* data, const char *extension, cons
 {
   SDL_RWops* rw = SDL_RWFromMem((void *)data,dsize);
   SDL_Surface* s=IMG_Load_RW(rw,true);
-  if (!s) DOPE_FATAL("Could not load image");
+  if (!s) JGACHINE_FATAL("Could not load image");
   return s;
 };
 

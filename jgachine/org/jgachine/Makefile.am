@@ -50,6 +50,7 @@ JGachineNative.o: $(created_h) JGachineNative.cpp
 
 jgachine_SOURCES = \
 	$(javasrc) \
+	common/error.h \
 	JGachineNative.cpp
 
 libs = \

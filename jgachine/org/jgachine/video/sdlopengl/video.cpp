@@ -12,6 +12,7 @@
 #include "fontdata.h"
 #include "glfont.h"
 #include <cassert>
+#include <csignal>
 
 #if defined(WIN32)
 #define NEED_WIN32_HACK 1
@@ -24,11 +25,11 @@
 static 
 void ShowError(const char *title, const char *message)
 {
-/* If USE_MESSAGEBOX is defined, you need to link with user32.lib */
+  /* If USE_MESSAGEBOX is defined, you need to link with user32.lib */
 #ifdef USE_MESSAGEBOX
-	MessageBox(NULL, message, title, MB_ICONEXCLAMATION|MB_OK);
+  MessageBox(NULL, message, title, MB_ICONEXCLAMATION|MB_OK);
 #else
-	fprintf(stderr, "%s: %s\n", title, message);
+  fprintf(stderr, "%s: %s\n", title, message);
 #endif
 }
 
@@ -38,7 +39,7 @@ static bool m_lineSmooth=true;
 static
 Video::ViewportCoordinates viewportCoordinates;
 
-typedef std::vector<DOPE_SMARTPTR<Texture> > Textures;
+typedef std::vector<JGACHINE_SMARTPTR<Texture> > Textures;
 // we do not use complex static data structures => pointer
 static Textures* textures=NULL;
 static GLFont* font=NULL;
@@ -88,7 +89,7 @@ motionBlur()
 
   // todo this should be time based
   //  if (!(++frame%3))
-    (*textures)[motionBlurTextureID]->copyFromScreen(m_width,m_height);
+  (*textures)[motionBlurTextureID]->copyFromScreen(m_width,m_height);
 
   setColor(tmp);
   glPopMatrix();
@@ -171,11 +172,11 @@ void resize(int width, int height, int m_flags)
   if (width==0) width=1;
   if (height==0) height=1;
 
-  DOPE_WARN("resize: "<<width<<"/"<<height);
+  JGACHINE_MSG("Info:","resize: "<<width<<"/"<<height);
 
   if (!(video=SDL_SetVideoMode(width, height, 0, m_flags))) {
-    DOPE_WARN(SDL_GetError());
-    throw std::runtime_error(std::string("Couldn't set video mode: ")+SDL_GetError());
+    JGACHINE_WARN(SDL_GetError());
+    JGACHINE_THROW((std::string("Couldn't set video mode: ")+SDL_GetError()).c_str());
   }
 }
 
@@ -197,6 +198,7 @@ killWindow()
   deinitGLSymbols();
 #endif
   SDL_QuitSubSystem(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK);
+  JGACHINE_MSG("Info:","SDL_Quit()");
   SDL_Quit();
 }
 
@@ -206,7 +208,11 @@ createWindow()
 {
   SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-  ::resize(1024,768,SDL_OPENGL|SDL_FULLSCREEN|SDL_RESIZABLE);
+  // todo check for available screen sizes
+  // let user decide which one to use
+
+  //  ::resize(1024,768,SDL_OPENGL|SDL_FULLSCREEN|SDL_RESIZABLE|SDL_ANYFORMAT);
+  ::resize(1024,768,SDL_OPENGL|SDL_RESIZABLE|SDL_ANYFORMAT);
 
   SDL_Surface* video=SDL_GetVideoSurface();
   // todo
@@ -233,8 +239,8 @@ createWindow()
   setMouseCursor();
 
   int db=0;
-  if (SDL_GL_GetAttribute( SDL_GL_DOUBLEBUFFER, &db )) DOPE_WARN("could not get attribute");
-  if (!db) DOPE_WARN("did not get double buffer");
+  if (SDL_GL_GetAttribute( SDL_GL_DOUBLEBUFFER, &db )) JGACHINE_WARN("could not get attribute");
+  if (!db) JGACHINE_WARN("did not get double buffer");
 
   setViewport(0,0,video->w,video->h);
   setViewportCoordinates(Video::ViewportCoordinates(0.0f,video->w,0.0f,video->h,-100.0f,100.0f));
@@ -273,6 +279,47 @@ createWindow()
   //  if (getGUIConfig().quality<=1) {glDisable(GL_DITHER);GL_ERRORS();}
 }
 
+#if 0
+extern "C" {
+  //! signal handler for fatal signals - to ensurce SDL_Quit is always called
+  /*!
+    \note
+    wanted to use sdl's parachute mechanism which catches fatal signals
+    that are not yet catched
+    gcj catches signals
+    (f.e. SIGSEGV and throws a java NullPointerException)
+    => even on a segfault we should reach deinit
+    (hmm perhaps user code should not be able to catch such exceptions!)
+    but somehow SDL thinks gcj doesn't catch signals?
+    => we do not use sdl's parachute
+
+    some fatal signals are not caught by gcj nor by SDL
+
+    should we call SDL_Quit - no matter what happens?
+    but perhaps this could lead to more serious problems than
+    the onces we have if SDL_Quit isn't called
+
+    hmm for testing i tried raise but:
+    raise(SIGSEGV);
+    and
+    ((char*)10)[9]='x';
+    are not treated equally
+
+
+    for now i am happy with gcj's handling of SIGSEGV
+  */
+  static
+  void
+  catchFatalSignal(int sig)
+  {
+    JGACHINE_MSG("Info:","SDL_Quit()");
+    SDL_Quit();
+
+    JGACHINE_FATAL("fatal signal");
+  }
+}
+#endif
+
 void Video::init()
 {
 #if defined(NEED_WIN32_HACK)
@@ -281,24 +328,28 @@ void Video::init()
   if ( SDL_Init(SDL_INIT_NOPARACHUTE) < 0 ) {
     std::string error(SDL_GetError());
     ShowError("WinMain() error", error.c_str());
-    throw std::runtime_error(std::string("Could not preinit SDL: ")+error);
+    JGACHINE_THROW((std::string("Could not preinit SDL: ")+error).c_str());
   }
   SDL_SetModuleHandle(GetModuleHandle(NULL));
+  // todo redirect stdout and stderr to files like SDL_main does
 #endif
-
-
 
   textures=new Textures();
   std::cout << __PRETTY_FUNCTION__ << std::endl;
   if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_NOPARACHUTE) < 0 ) {
-    throw std::runtime_error(std::string("Couldn't init SDL: ")+SDL_GetError());
+    JGACHINE_THROW((std::string("Couldn't init SDL: ")+SDL_GetError()).c_str());
   }
+
+#if 0
+  signal(SIGILL, catchFatalSignal);
+#endif
   
 #ifdef DLOPEN_OPENGL
   loadGL(getGUIConfig().libGL);
   loadGLU(getGUIConfig().libGLU);
   lookupGLSymbols();
 #endif  
+
   createWindow();
 
   // load font texture
@@ -310,7 +361,7 @@ void Video::init()
 
 #ifdef VIDEO_MOTION_BLUR
   // create texure for motion blur
-  DOPE_SMARTPTR<Texture> mbt(new Texture(motionBlurTextureSize));
+  JGACHINE_SMARTPTR<Texture> mbt(new Texture(motionBlurTextureSize));
   textures->push_back(mbt);
   motionBlurTextureID=mbt->getTextureID();
 #endif
@@ -335,10 +386,10 @@ void Video::deinit()
 void
 Video::drawLine(float x1,float y1,float x2,float y2)
 {
-    glBegin(GL_LINES);
-    glVertex2f(x1,y1);
-    glVertex2f(x2,y2);
-    glEnd();
+  glBegin(GL_LINES);
+  glVertex2f(x1,y1);
+  glVertex2f(x2,y2);
+  glEnd();
 }
 
 
@@ -355,10 +406,10 @@ Video::swapBuffers()
 int
 Video::createTexture(unsigned dsize, const char* data, const char *extension, const char *mimeType)
 {
-  DOPE_SMARTPTR<Texture> t(new Texture(dsize,data,extension,mimeType));
+  JGACHINE_SMARTPTR<Texture> t(new Texture(dsize,data,extension,mimeType));
   int id=t->getTextureID();
-  DOPE_MSG("Info:", "Texture ID: "<<id);
-  DOPE_CHECK((id>=0)&&(id<30000));
+  JGACHINE_MSG("Info:", "Texture ID: "<<id);
+  JGACHINE_CHECK((id>=0)&&(id<30000));
   if (id>=(int)textures->size())
     textures->resize(id+1);
   (*textures)[id]=t;
@@ -386,16 +437,16 @@ Video::drawQuad()
 void
 Video::drawTexture(int tid)
 {
-  DOPE_CHECK(textures);
+  JGACHINE_CHECK(textures);
   if ((tid<0)||(tid>=(int)textures->size())) {
-    DOPE_WARN("invalid texure id:"<<tid);
+    JGACHINE_WARN("invalid texure id:"<<tid);
     return;
   }
     
   glEnable(GL_TEXTURE_2D);
 
-  //  DOPE_SMARTPTR<Texture> &t((*textures)[tid]);
-  //  DOPE_CHECK(t.get());
+  //  JGACHINE_SMARTPTR<Texture> &t((*textures)[tid]);
+  //  JGACHINE_CHECK(t.get());
   //  bool blend=(t->isTransparent());
   //  if (blend) glEnable(GL_BLEND);
   //  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -497,7 +548,7 @@ Video::project(float x, float y)
 		  &win[0],&win[1],&win[2])){
     // todo BUG: we are in trouble
     GL_ERRORS();
-    DOPE_WARN("gluProject failed");
+    JGACHINE_WARN("gluProject failed");
     win[0]=win[1]=0;
   }
   return Coord2i(win[0],win[1]);

@@ -11,13 +11,13 @@ printGLErrors()
   int res=0;
   int e;
   while ((e=glGetError())) {
-    DOPE_MSG("GL Error: ", e);
+    JGACHINE_MSG("GL Error: ", e);
     std::ios::fmtflags old=std::cerr.flags();
     std::cerr << "GL Error: " << e << "=0x" << std::hex << e << std::endl;
     std::cerr.flags(old);
     ++res;
     if (res>5) {
-      DOPE_WARN("stop printing errors because there are too much (parhaps some other problem)");
+      JGACHINE_WARN("stop printing errors because there are too much (parhaps some other problem)");
       return res;
     }
   }
@@ -45,7 +45,7 @@ loadGL(const std::string &libGL)
   if (!libGL.empty()) lib=libGL.c_str();
   if (SDL_GL_LoadLibrary(lib)==-1) {
     DEBUG_GL("failed to load gl library");
-    throw std::runtime_error(std::string("Could not load OpenGL lib: \"")+libGL+"\": "+SDL_GetError()+". Try the --libGL switch");
+    JGACHINE_THROW(std::string("Could not load OpenGL lib: \"")+libGL+"\": "+SDL_GetError()+". Try the --libGL switch".c_str());
   }
 }
 
@@ -63,13 +63,13 @@ void* gluHandle=NULL;
 void
 loadGLU(const std::string &libGLU)
 {
-  DOPE_ASSERT(!gluHandle);
+  JGACHINE_CHECK(!gluHandle);
   std::string lib(libGLU);
   if (lib.empty()) lib="libGLU.so.1";
   gluHandle = dlopen (lib.c_str(), RTLD_LAZY);
   if (!gluHandle) {
     DEBUG_GL("failed to load glu library");
-    throw std::runtime_error(std::string("Could not load GLU lib: \"")+lib+"\". Try the --libGLU switch");
+    JGACHINE_THROW(std::string("Could not load GLU lib: \"")+lib+"\". Try the --libGLU switch".c_str());
   }
 }
 
@@ -77,7 +77,7 @@ static
 _GLUfuncptr
 GetGluProcAddress(char *symbol)
 {
-  DOPE_ASSERT(gluHandle);
+  JGACHINE_ASSERT(gluHandle);
   return (_GLUfuncptr)dlsym(gluHandle,symbol);
 }
 // end GLU hack
@@ -88,7 +88,7 @@ lookupGLSymbols()
 {
 #define STRINGIFY(m) #m
   DEBUG_GL("looking up GL and GLU symbols");
-#define FUNC(ret,name,parm) do{typedef ret (*T##name) parm ;name=(T##name)SDL_GL_GetProcAddress(STRINGIFY(name));if(!name) name=(T##name)GetGluProcAddress(STRINGIFY(name));DOPE_ASSERT(name);DEBUG_GL("got address of:" STRINGIFY(name) " it is at: " << ((void *)name));}while(0)
+#define FUNC(ret,name,parm) do{typedef ret (*T##name) parm ;name=(T##name)SDL_GL_GetProcAddress(STRINGIFY(name));if(!name) name=(T##name)GetGluProcAddress(STRINGIFY(name));JGACHINE_ASSERT(name);DEBUG_GL("got address of:" STRINGIFY(name) " it is at: " << ((void *)name));}while(0)
 #include "glfunctions.h"
 #undef FUNC
 #undef STRINGIFY
@@ -105,7 +105,7 @@ deinitGLSymbols()
 #undef STRINGIFY
   if (gluHandle) {
     if (dlclose(gluHandle)) {
-      DOPE_WARN("GLU unload failed");
+      JGACHINE_WARN("GLU unload failed");
     }else{
       gluHandle=NULL;
     }
