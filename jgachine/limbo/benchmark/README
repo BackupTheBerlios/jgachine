@@ -1,0 +1,16 @@
+benchmark test
+serialization/deserialization
+
+results (serialization):
+interpreted with gij:
+~6600
+interpreted with sun jvm 1.4.2
+~550
+compiled with gij:
+~6600
+
+wow this is >10 slower!
+
+but 550 is still to slow for me
+because this means 55ms for a simple scenegraph
+and i would accept something around 5ms

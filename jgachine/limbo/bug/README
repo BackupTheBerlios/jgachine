@@ -1,0 +1,5 @@
+Test for gcc bug #14572
+(http://gcc.gnu.org/bugzilla/show_bug.cgi?id=14572)
+
+just run runtest.sh
+should output OK
