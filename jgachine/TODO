@@ -75,7 +75,11 @@
 		(but i used this to get mesa offscreen working on framebuffer...)
 		ship with libraries and set LD_LIBRARY_PATH (perhaps optional...)
 
-	cross-compile to windows with mingw
+	cross-compile to windows with mingw:
+		this is non-trivial at the moment:
+			http://www.thisiscool.com/gcc_mingw.htm (search for cross)
+			http://gcc.gnu.org/ml/java-patches/2003-q2/msg00111.html
+
 - signal:
 	at the moment only one object may be passed to a slot (signal consists of
 	one object)
