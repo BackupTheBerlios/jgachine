@@ -167,6 +167,29 @@ org::jgachine::JGachine::drawLine(jfloat x1, jfloat y1, jfloat x2, jfloat y2)
 }
 
 void
+org::jgachine::JGachine::drawLines(JArray<javax::vecmath::Vector2f*>* pts)
+{
+  //! \todo extend the video interface and throw exception on error
+  assert(pts);
+  assert(!(pts->length % 2));
+  for (int i=0;i<pts->length;i+=2) {
+    assert((*pts)[i]&&(*pts)[i+1]);
+    Video::drawLine((*pts)[i]->x,(*pts)[i]->y,(*pts)[i+1]->x,(*pts)[i+1]->x);
+  }
+}
+
+void
+org::jgachine::JGachine::drawLineStrip(JArray<javax::vecmath::Vector2f*>* pts)
+{
+  //! \todo extend the video interface and throw exception on error
+  assert(pts);
+  for (int i=0;i<pts->length-1;++i) {
+    assert((*pts)[i]&&(*pts)[i+1]);
+    Video::drawLine((*pts)[i]->x,(*pts)[i]->y,(*pts)[i+1]->x,(*pts)[i+1]->x);
+  }
+}
+
+void
 org::jgachine::JGachine::drawQuad()
 {
   Video::drawQuad();
@@ -366,5 +389,20 @@ org::jgachine::JGachine::popViewport()
 {
   assert(state);
   state->viewportStack.pop();
+}
+
+jint
+org::jgachine::JGachine::createPolygon(JArray<JArray<javax::vecmath::Vector2f*>*>* contours)
+{
+}
+
+void
+org::jgachine::JGachine::drawPolygon(jint id)
+{
+}
+
+void
+org::jgachine::JGachine::deletePolygon(jint id)
+{
 }
 

@@ -16,6 +16,7 @@ are a -->HIGH SECURITY RISK<-- (see also TODO)
 The Goals:
 - easy game programing for beginners
   (no general purpose game engine)
+  intended for teaching or selfteaching
 - a game machine/engine/browser
 - one client for multiple games
 - you only write the game server (though the server may
@@ -25,9 +26,14 @@ The Goals:
   => no file access, no network access (except to the server),
   .... 
 - writing multiplayer networked games within 2 hours
-
-
-
+- portable
+- try to allow output device independent games
+  device independent coordinates
+  help with different/changing aspect ratios
+  give info of real screen size (DPI))
+  this should allow writing games running on many different displays
+  (of course this has some limits)
+  see tutorial/pong3 for a minimalistic example
 
 QUICK START:
 ================================================================================

@@ -1,5 +1,6 @@
 package org.jgachine.scenegraph;
 
+import javax.vecmath.*;
 import org.jgachine.*;
 import org.jgachine.signal.*;
 import org.jgachine.event.*;

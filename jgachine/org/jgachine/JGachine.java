@@ -9,14 +9,47 @@ import org.jgachine.event.*;
 //! simple game engine
 public class JGachine {
     // info
-    //! get current width of video screen
+    //! get current width of video screen/window [pixels]
+    /*!
+      \note this may change while running the game
+      since on some platforms the video screen is
+      a resizable window
+    */
     static public int getWidth() {
 	return width;
     }
-    //! get current height of video screen
+    //! get current height of video screen/window [pixels]
+    /*!
+      \note this may change while running the game
+      since on some platforms the video screen is
+      a resizable window
+    */
     static public int getHeight() {
 	return height;
     }
+    //! get current real width of video screen/window [mm]
+    /*!
+      \note this may change while running the game
+      since on some platforms the video screen is
+      a resizable window
+      \return 0 if unknown
+      \todo try to implement it
+    */
+    static public int getRealWidth() {
+	return 0;
+    }
+    //! get current real height of video screen/window [mm]
+    /*!
+      \note this may change while running the game
+      since on some platforms the video screen is
+      a resizable window
+      \return 0 if unknown
+      \todo try to implement it
+    */
+    static public int getRealHeight() {
+	return 0;
+    }
+    
 
     // coordinates and viewports
 
@@ -60,12 +93,27 @@ public class JGachine {
     static public native void popViewport();
 
     // graphics primitives
+    //! draw line with current color
     static public native void drawLine(float x1,float y1, float x2, float y2);
-    //! draws a 1/1 sized quad centered on current position
+    //! draw lines with current color
+    /*!
+      \param pts each pair is one independent line
+    */
+    static public native void drawLines(Vector2f pts[]);
+    //! draw connected lines with current color
+    static public native void drawLineStrip(Vector2f pts[]);
+
+    //! draws a 1/1 sized quad centered on current position with current color
     static public native void drawQuad();
+    //! draw complex polygon (s.a. createPolygon)
+    static public native void drawPolygon(int id);
     //! draws a 1/1 sized textured quad centered on current position
+    /*!
+      \note the current color is used!
+      \todo explain how the current color is used
+    */
     static public native void drawTexture(int tid);
-    //! draws a text string with fixed with font of size 1/1
+    //! draws a text string with fixed width font of size 1/1
     /*!
       \param text the text
       \param hcentered center text horizontally
@@ -162,8 +210,15 @@ public class JGachine {
     {
 	return resourceLoader.get(resname);
     }
+    //! create polygon resource
+    /*!
+      create complex polygon (perhaps not convex and perhaps multiple contours)
+      see man gluTessBeginPolygon to get the idea
 
-
+      \return Polygon id
+    */
+    static public native int createPolygon(Vector2f contours[][]);
+    static public native void deletePolygon(int id);
 
     static public void main(String args[]) {
 	if (runCalled) return;

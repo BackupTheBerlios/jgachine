@@ -8,18 +8,18 @@
   - ...
   => Now we try to change the game to not assume any resolution
 
-  Screens differ in resolution and in aspect ratio.
+  Screens differ in resolution and in aspect ratio. (and in real size)
 
   We could try to react to aspect ratio changes in a intelligent manner (change layout, ..)
   for now we are happy if it all works and the image isn't distorted.
 
-  Since 1.333...:1 is a very common aspect ration we use a coordinate system like that:
+  Since 1.333...:1 is a very common aspect ratio we use a coordinate system like that:
   x: left<=-1.333<=+1.333<=right
   y: bottom<=-1<=+1<=top
 
   if the aspect ratio is 1.333..:1 everything is fine
   if the ratio is 2.666..:1 we depend only on half of the screen (the rest could be filled with
-  less important stuff or simply be black)
+  unimportant stuff or simply be black)
 
   we replaced 1024/2 with Pong.width/2 everyhere
   and 768/2 with Pong.height/2 everywhere

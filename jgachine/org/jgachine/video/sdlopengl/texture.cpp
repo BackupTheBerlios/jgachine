@@ -56,6 +56,7 @@ Texture::Texture(unsigned dsize, const char* data, const char *extension, const 
     18,3,
     0,0,0,8,
     0,8,10,0,
+    //! \todo bug with big endian?!
     0xff,0xff00,0xff0000,0x0,
     0,
     0xff
@@ -66,6 +67,7 @@ Texture::Texture(unsigned dsize, const char* data, const char *extension, const 
     32,4,
     0,0,0,0,
     0,8,16,24,
+    //! \todo bug with big endian?!
     0xff,0xff00,0xff0000,0xff000000,
     0,
     0xff
@@ -95,40 +97,6 @@ Texture::Texture(unsigned dsize, const char* data, const char *extension, const 
   tmp=NULL;
   width=image->w;
   height=image->h;
-  if (haveAlphaChannel&&(0<0)) {
-    // set alpha channel to on or off
-    // I thought mesa would be much faster in this case but it isn't
-    // => this is nearly dead code
-    SDL_LockSurface(image);
-    
-    SDL_PixelFormat *fmt;
-    Uint32 temp, pixel;
-    Uint8 alpha;
-    fmt=image->format;
-    JGACHINE_CHECK(fmt->BytesPerPixel==4);
-    JGACHINE_CHECK(!fmt->Aloss);
-    JGACHINE_CHECK(fmt->Amask>>fmt->Ashift==255);
-    // this is really slow - but it is not called often and
-    // easy to understand
-    for (int c=0;c<width*height;++c) {
-      pixel=((Uint32*)image->pixels)[c];
-      /* Get Alpha component */
-      temp=pixel&fmt->Amask; /* Isolate alpha component */
-      temp=temp>>fmt->Ashift;/* Shift it down to 8-bit */
-      temp=temp<<fmt->Aloss; /* Expand to a full 8-bit number */
-      alpha=(Uint8)temp;
-      alpha=(alpha>100) ? 255 : 0;
-      temp=alpha;
-
-      
-      temp=temp>>fmt->Aloss;
-      temp=temp<<fmt->Ashift;
-      pixel&=~fmt->Amask;
-      pixel|=(temp&fmt->Amask);
-      ((Uint32*)image->pixels)[c]=pixel;
-    }
-    SDL_UnlockSurface(image);
-  }
   
   glGenTextures(1,&textureID);
   glBindTexture(GL_TEXTURE_2D,textureID);

@@ -131,7 +131,9 @@
 	started with a pong
 	perhaps completely split it out of the core package
 	to get a realistic tutorial
-
+	split screen demo
+	menu demo
+	
 - scheduling:
 	still sucks
 	linux kernel 10ms (2.4)

@@ -1,5 +1,6 @@
 package org.jgachine.scenegraph;
 
+import javax.vecmath.*;
 import org.jgachine.*;
 
 //! draw a 1x1 border
