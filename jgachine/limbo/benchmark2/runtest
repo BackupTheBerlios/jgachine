@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+CLASSPATH="$CLASSPATH:."
+ARGS="-classpath $CLASSPATH"
+JVMS="java /usr/local/mozilla-plugins/java2/bin/java"
+
+function runtest()
+{
+    javac *.java
+    for JVM in $JVMS; do
+	echo Test with JVM: $JVM
+	$JVM $ARGS Test
+	echo
+    done
+}
+
+echo Using Serializable Interface
+echo
+cpp <Test.java.cpp|grep -v "^#" >Test.java
+runtest
+
+echo
+
+echo Using Externalizable Interface
+cpp -DEXT <Test.java.cpp|grep -v "^#" >Test.java
+runtest
+
+echo Compiled with gcj
+gcj -O2 -Wall -g -o Test Test.java --main=Test
+./Test
