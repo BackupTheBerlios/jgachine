@@ -21,6 +21,9 @@ namespace Input
 
   // callbacks
   void quitHandler();
+  void toggleFullscreenHandler();
+  void iconifyHandler();
+  
   void devStateHandler(const DevState&);
   void charHandler(Unicode);
   void resizeHandler(int sx, int sy);

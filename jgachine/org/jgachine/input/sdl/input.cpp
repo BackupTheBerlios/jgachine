@@ -61,15 +61,60 @@ Input::attachedDevices()
 }
 
 static
+void toggleGrab()
+{
+  SDL_GrabMode mode;
+
+  //  printf("Ctrl-G: toggling input grab!\n");
+  mode = SDL_WM_GrabInput(SDL_GRAB_QUERY);
+  if ((mode!=SDL_GRAB_OFF)&&(mode!=SDL_GRAB_ON))
+    return;
+  /*
+    if ( mode == SDL_GRAB_ON ) {
+    printf("Grab was on\n");
+    } else {
+    printf("Grab was off\n");
+    }
+  */
+  mode = SDL_WM_GrabInput((mode==SDL_GRAB_ON)?SDL_GRAB_OFF:SDL_GRAB_ON);
+  /*
+    if ( mode == SDL_GRAB_ON ) {
+    printf("Grab is now on\n");
+    } else {
+    printf("Grab is now off\n");
+    }
+  */
+}
+
+
+static
 bool
 handleKey(SDL_KeyboardEvent &e)
 {
   bool pressed=e.state==SDL_PRESSED;
   if (!pressed) return false;
-  SDLKey k(e.keysym.sym);
-  if (k==SDLK_ESCAPE) {
+  switch (e.keysym.sym){
+  case SDLK_g:
+    if (e.keysym.mod & KMOD_CTRL) {
+      toggleGrab();
+      return true;
+    }
+    break;
+  case SDLK_z:    
+    if (e.keysym.mod & KMOD_CTRL) {
+      Input::iconifyHandler();
+      return true;
+    }
+    break;
+  case SDLK_ESCAPE:
     Input::quitHandler();
     return true;
+  case SDLK_RETURN:
+    if (e.keysym.mod & KMOD_ALT){
+      Input::toggleFullscreenHandler();
+      return true;
+    }
+    break;
   }
   return false;
 }

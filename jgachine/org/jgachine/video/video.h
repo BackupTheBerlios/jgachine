@@ -9,6 +9,9 @@ namespace Video
   
   void init();
 
+  void toggleFullscreen();
+  void iconify();
+  
   void drawLine(int x1,int y1,int x2,int y2);
   void swapBuffers();
   int createTexture(unsigned dsize, const char* data, const char *extension=NULL, const char *mimeType=NULL);

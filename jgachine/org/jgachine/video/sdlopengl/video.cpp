@@ -399,3 +399,21 @@ Video::clear()
 {
   glClear(GL_COLOR_BUFFER_BIT);
 }
+
+void
+Video::toggleFullscreen()
+{
+  SDL_Surface *screen = SDL_GetVideoSurface();
+  if (!screen) return;
+  if (SDL_WM_ToggleFullScreen(screen)) {
+    //  bool fullscreen=screen->flags&SDL_FULLSCREEN;
+  } else {
+    // printf("Unable to toggle fullscreen mode\n");
+  }
+}
+
+void
+Video::iconify()
+{
+  SDL_WM_IconifyWindow();
+}

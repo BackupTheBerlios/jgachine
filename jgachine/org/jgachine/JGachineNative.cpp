@@ -36,6 +36,18 @@ Input::quitHandler()
 }
 
 void
+Input::toggleFullscreenHandler()
+{
+  Video::toggleFullscreen();
+}
+
+void
+Input::iconifyHandler()
+{
+  Video::iconify();
+}
+
+void
 Input::devStateHandler(const Input::DevState& state)
 {
   if (org::jgachine::JGachine::quit) return;
