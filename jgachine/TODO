@@ -15,6 +15,21 @@
 - networking: 
 	distributed scene graph (is it possible to do a general one
 	working good enough for interactive realtime games?)
+	yes i think so
+	first step would be a simple one
+	second step would be some intelligent nodes for realtime games
+	simple scene graph:
+		needs way to send complete scene graph to client
+		(serialization/pickling)
+		must be able to update scene graph
+			(either transfer nodes or do somthing like rmi)
+	intelligent/complex scene graph:
+		at least interpolate
+		=> moving nodes (speed, acceleration)
+		integrate on client side
+		from time to time send node to client
+		adjust as neccessary
+		(do it like adic does)
 
 	synchronous vs. asynchronous vs. both handling:
 		completely asynchronous:
