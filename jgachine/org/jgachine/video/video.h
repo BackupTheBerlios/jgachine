@@ -6,6 +6,9 @@
 namespace Video
 {
   struct Color;
+  struct ViewportCoordinates;
+  struct Coord2i;
+  struct Rectangle;
   
   void init();
 
@@ -13,7 +16,7 @@ namespace Video
   void iconify();
   void resize(int sx, int sy);
   
-  void drawLine(int x1,int y1,int x2,int y2);
+  void drawLine(float x1,float y1,float x2,float y2);
   void swapBuffers();
   int createTexture(unsigned dsize, const char* data, const char *extension=NULL, const char *mimeType=NULL);
   void drawTexture(int tid);
@@ -22,6 +25,12 @@ namespace Video
   
   void setColor(const Color &c);
   Color getColor();
+
+  void setViewportCoordinates(const ViewportCoordinates &coords);
+  ViewportCoordinates getViewportCoordinates();
+  
+  void setViewport(const Rectangle &r);
+  Rectangle getViewport();
   
   void pushMatrix();
   void popMatrix();
@@ -29,6 +38,8 @@ namespace Video
   void scale(float x,float y);
   void rotate(float r);
   void clear();
+  //! get screen (window) coordinates for this point
+  Coord2i project(float x, float y);
   
   void deinit();
 
@@ -51,6 +62,44 @@ namespace Video
       b*=o.b;
       a*=o.a;
       return *this;
+    }
+  };
+
+  struct ViewportCoordinates 
+  {
+    ViewportCoordinates(){}
+    ViewportCoordinates(float _left, float _right, float _bottom, float _top, float _near, float _far)
+      : left(_left), right(_right), bottom(_bottom), top(_top), near(_near), far(_far)
+    {}
+    
+    float left,right,bottom,top,near,far;
+    void set() const
+    {
+      setViewportCoordinates(*this);
+    }
+  };
+
+  struct Coord2i
+  {
+    Coord2i()
+    {}
+    Coord2i(int _x,int _y)
+      : x(_x), y(_y)
+    {}
+    int x,y;
+  };
+
+  struct Rectangle
+  {
+    Rectangle()
+    {}
+    Rectangle(int _x, int _y, int _sx, int _sy)
+      : x(_x), y(_y), sx(_sx), sy(_sy)
+    {}
+    int x,y,sx,sy;
+    void set() const
+    {
+      setViewport(*this);
     }
   };
 };

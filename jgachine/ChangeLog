@@ -1,3 +1,26 @@
+2003-11-21  Jens Thiele  <karme@berlios.de>
+
+	* tried to add a hack around the resize problem with
+	sdl and sawfish (does not work => disabled)
+
+	* added pong3 to tutorial demonstarting coordinate
+	system independent of screen resolution but keeping
+	aspect
+
+	* allow setting coordinate system
+
+	* allow setting viewport
+	
+
+2003-11-20  Jens Thiele  <karme@berlios.de>
+
+	* allow resize
+
+	* added typical SDL app key bindings:
+	toggle fullscreen: alt+enter
+	iconify: ctrl+z
+	toggle input grab: ctrl+g
+
 2003-11-18  Jens Thiele  <karme@berlios.de>
 
 	* org/jgachine/Makefile.am binary now lowercase

@@ -63,6 +63,8 @@
 			draw scene alpha blended
 		the tutorial (pong) does motion blur manually now
 	* let user configure: if he wants fullscreen, resolution, bpp
+	  unfortunately there seems to be no way to simply use the current
+	  video settings with SDL (in fullscreen mode)
 
 - scenegraph:
 	perhaps it is a bad idea to use subclasses, better use interfaces?

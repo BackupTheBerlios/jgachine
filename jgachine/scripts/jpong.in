@@ -1,2 +1,6 @@
 #!/bin/sh
-CLASSPATH=@classdir@/pong.jar:@classdir@/vecmath.jar:@datadir@ exec jgachine tutorial.pong2.Pong
+V="$1"
+if [ "x$V" = "x" ]; then
+    V="1"
+fi
+CLASSPATH=@classdir@/pong$V.jar:@classdir@/vecmath.jar:@datadir@ exec jgachine tutorial.pong$V.Pong

@@ -1,1 +1,1 @@
-SUBDIRS = demo pong1 pong2 server
+SUBDIRS = demo pong1 pong2 pong3 server

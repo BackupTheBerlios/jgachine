@@ -18,6 +18,6 @@ EXTRA_DIST = $(source)
 # include after classes is set
 include $(top_srcdir)/Common.mk
 
-jar_DATA = pong.jar
+jar_DATA = pong2.jar
 
-MOSTLYCLEANFILES = pong.jar
+MOSTLYCLEANFILES = pong2.jar

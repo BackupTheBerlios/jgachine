@@ -25,9 +25,47 @@ toCppColor(::org::jgachine::Color *c)
   return Video::Color(c->r,c->g,c->b,c->a);
 }
 
+//! stack class with special assumption that X has a set() method which is called on pop
+template <typename X>
+class Stack
+{
+ public:
+  void push(const X &x)
+    {
+      stack.push_back(x);
+    }
+  void pop()
+    {
+      if (stack.empty()) {
+	// todo
+	std::cerr << "pop called but stack is empty\n";
+	return;
+      }
+      stack.back().set();
+      stack.pop_back();
+    }
+ protected:
+  std::vector<X> stack;
+};
 
-typedef std::vector<Video::Color> ColorStack;
-static ColorStack* colorStack=NULL;
+//! container for our global data
+/*!
+  \note we do not make our complex global data structures static
+  to prevent problems with memory debuggers, initialization and the like
+  this is why we added State - to have the new/delete only once
+*/
+struct State
+{
+  typedef Stack<Video::Color> ColorStack;
+  ColorStack colorStack;
+  typedef Stack<Video::Rectangle> ViewportStack;
+  ViewportStack viewportStack;
+  typedef Stack<Video::ViewportCoordinates> ViewportCoordinatesStack;
+  ViewportCoordinatesStack viewportCoordinates;
+};
+
+static
+State* state=NULL;
 
 void
 Input::quitHandler()
@@ -48,16 +86,16 @@ Input::iconifyHandler()
 }
 
 void
-Input::devStateHandler(const Input::DevState& state)
+Input::devStateHandler(const Input::DevState& devState)
 {
   if (org::jgachine::JGachine::quit) return;
   if (!org::jgachine::JGachine::input) return;
   // translate c++ object to java object
   org::jgachine::event::DevState* s=new org::jgachine::event::DevState();
-  s->x=state.x;
-  s->y=state.y;
-  s->buttons=state.buttons;
-  s->devno=state.devno;
+  s->x=devState.x;
+  s->y=devState.y;
+  s->buttons=devState.buttons;
+  s->devno=devState.devno;
   org::jgachine::JGachine::input->dispatch(s);
 }
 
@@ -66,8 +104,10 @@ void
 Input::resizeHandler(int sx, int sy)
 {
   // resize neccessary? prevent possible endless loop where video subsystem generates input event
-  // hmm still shit but i will not implement a work-around (skip all events until we get one we expect from
-  // our resize)
+  // hmm still shit 
+  // 
+  // UPDATE: i implemented a workaround in sdl/input.cpp (NEED_RESIZE_HACK)
+  // 
   // the (sdlopengl) video subsystem generates resize requests - this is a real problem with wm's like sawfish....
   // corresponding discussion on SDL ML: http://www.libsdl.org/pipermail/sdl/2003-July/thread.html#55073
   // Idea: perhaps sawfish does also react on application requested resizes and tries to resize
@@ -76,8 +116,8 @@ Input::resizeHandler(int sx, int sy)
   // 2. take a look at the sawfish source
   // 3. how did I do it in TUD? / read the Xlib manual
   // 4. read the SDL source
-  if ((sx==org::jgachine::JGachine::width)&&(sy==org::jgachine::JGachine::height))
-    return;
+  //  if ((sx==org::jgachine::JGachine::width)&&(sy==org::jgachine::JGachine::height))
+  //    return;
 
   // tell the video layer to actually resize
   Video::resize(sx,sy);
@@ -100,8 +140,8 @@ org::jgachine::JGachine::init()
   if (inited) return;
   inited=true;
   
-  assert(!colorStack);
-  colorStack=new ColorStack();
+  assert(!state);
+  state=new State();
 
   // at the moment video must always be initialized first (this is caused by the sdlopengl video implementation)
   Video::init();
@@ -112,17 +152,16 @@ void org::jgachine::JGachine::deinit()
 {
   if (!inited) return;
   
-  if (colorStack) {
-    delete colorStack;
-    colorStack=NULL;
+  if (state) {
+    delete state;
+    state=NULL;
   }
-  
   Input::deinit();
   Video::deinit();
 }
 
 void
-org::jgachine::JGachine::drawLine(jint x1, jint y1, jint x2, jint y2)
+org::jgachine::JGachine::drawLine(jfloat x1, jfloat y1, jfloat x2, jfloat y2)
 {
   Video::drawLine(x1,y1,x2,y2);
 }
@@ -239,20 +278,15 @@ org::jgachine::JGachine::getColor()
 void 
 org::jgachine::JGachine::pushColor ()
 {
-  assert(colorStack);
-  colorStack->push_back(Video::getColor());
+  assert(state);
+  state->colorStack.push(Video::getColor());
 }
 
 void 
 org::jgachine::JGachine::popColor ()
 {
-  assert(colorStack);
-  if (colorStack->empty()) {
-    std::cerr << "TODO: should not happen\n";
-    return;
-  }
-  colorStack->back().set();
-  colorStack->pop_back();
+  assert(state);
+  state->colorStack.pop();
 }
 
 jlong 
@@ -265,5 +299,72 @@ void
 org::jgachine::JGachine::uSleep (jlong usec)
 {
   Timer::uSleep(usec);
+}
+
+void
+org::jgachine::JGachine::setViewport(jint x, jint y, jint sx, jint sy)
+{
+  Video::setViewport(Video::Rectangle(static_cast<int>(x),
+				      static_cast<int>(y),
+				      static_cast<int>(sx),
+				      static_cast<int>(sy))
+		     );
+}
+
+
+void 
+org::jgachine::JGachine::setViewportCoordinates(jfloat left, jfloat right,
+			    jfloat bottom, jfloat top,
+			    jfloat near, jfloat far)
+{
+  Video::setViewportCoordinates(Video::ViewportCoordinates(left,right,
+							   bottom,top,
+							   near,far));
+}
+
+void 
+org::jgachine::JGachine::pushViewportCoordinates()
+{
+  assert(state);
+  state->viewportCoordinates.push(Video::getViewportCoordinates());
+}
+
+void 
+org::jgachine::JGachine::popViewportCoordinates()
+{
+  assert(state);
+  state->viewportCoordinates.pop();
+}
+
+
+
+
+void
+org::jgachine::JGachine::adjustViewport(::javax::vecmath::Vector2f * bottomLeft, ::javax::vecmath::Vector2f * topRight)
+{
+  // 1. calculate window coordinates
+  const Video::Coord2i &llwin(Video::project(bottomLeft->x,bottomLeft->y));
+  const Video::Coord2i &urwin(Video::project(topRight->x,topRight->y));
+
+  // 2. set new viewport
+  int sx=urwin.x-llwin.x;
+  int sy=urwin.y-llwin.y;
+  
+  // 3. todo check for errors
+  Video::setViewport(Video::Rectangle(llwin.x,llwin.y,sx,sy));
+}
+
+void
+org::jgachine::JGachine::pushViewport()
+{
+  assert(state);
+  state->viewportStack.push(Video::getViewport());
+}
+
+void
+org::jgachine::JGachine::popViewport()
+{
+  assert(state);
+  state->viewportStack.pop();
 }
 

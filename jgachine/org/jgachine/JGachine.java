@@ -18,18 +18,73 @@ public class JGachine {
 	return height;
     }
 
+    // coordinates and viewports
+
+    //! set current view port coordinates
+    /*!
+      \note The OpenGL implementation calls glOrtho with the given parameters
+      (man glOrtho). The idea is to let the game programer decide if he wants
+      to use device independent coordinates or not and how his coordinate
+      system should look like.
+      If he does not want device independant coodinates he must update the 
+      coordinate system on each resize. This must be done with device
+      independant coordinates, too, if the aspect ratio should be respected
+      - but then this are not really device independant coordinates anymore
+    */
+    static public native void setViewportCoordinates(float left, float right,
+						     float bottom, float top,
+						     float near, float far);
+    static public native void pushViewportCoordinates();
+    static public native void popViewportCoordinates();
+
+    //! set current view port (position and size)
+    /*!
+      \param x bottom left x
+      \param y bottom left y
+      \param sx width
+      \param sy height
+      \note this are screen (window) coordinates - with OpenGL coordinate
+      convention: bottom left is (0/0) top right is (width-1,height-1)
+      (man glViewport)
+    */
+    static public native void setViewport(int x, int y, int sx, int sy);
+    //! adjust current viewport
+    /*!
+      \param bottomLeft the coordinates of the bottom left corner
+      \param topRight the coordinates of the top right corner
+      \note this are "normal" coordinates (coordinates relative to the 
+      current viewport coordinate system) not screen (window) coordinates
+    */
+    static public native void adjustViewport(Vector2f bottomLeft, Vector2f topRight);
+    static public native void pushViewport();
+    static public native void popViewport();
+
     // graphics primitives
-    static public native void drawLine(int x1,int y1, int x2, int y2);
+    static public native void drawLine(float x1,float y1, float x2, float y2);
+    //! draws a 1/1 sized quad centered on current position
     static public native void drawQuad();
-    static public int  createTexture(String resname)
-	throws java.io.IOException
-    {
-	return createTexture(getResource(resname));
-    }
-    static public native int  createTexture(Resource imageData);
+    //! draws a 1/1 sized textured quad centered on current position
     static public native void drawTexture(int tid);
+    //! draws a text string with fixed with font of size 1/1
+    /*!
+      \param text the text
+      \param hcentered center text horizontally
+      \param vcentered center text vertically
+
+      \note if neither hcentered nor vcentered is true the bottom left of the text
+      is drawn at the current position
+    */
     static public native void drawText(String text, boolean hcentered, boolean vcentered);
+    //! clear current viewport
+    /*!
+      \todo in the moment the clear color can't be set - should we use the current color?
+    */
     static public native void clear();
+    //! swap front and back buffer
+    /*!
+      \todo in the moment we always try to get a double buffered visual and there is
+      no way for the game programer to change this - and to know if we really got one
+    */
     static public native void swapBuffers();
 
     // state manipulation
@@ -90,6 +145,17 @@ public class JGachine {
 	input.dispatch(obj);
     }
 
+    // resources
+
+    //! create texture from resource name
+    static public int  createTexture(String resname)
+	throws java.io.IOException
+    {
+	return createTexture(getResource(resname));
+    }
+    //! create texture from resource
+    static public native int  createTexture(Resource imageData);
+
     //! get resource
     static public Resource getResource(String resname)
 	throws java.io.IOException
@@ -106,8 +172,8 @@ public class JGachine {
 	if ((args==null)||(args.length<1))
 	    {
 		System.out.println("Usage: Client uri arg1 arg2 ...");
-		System.out.println("Where uri is simply a class name for local games (f.e. example.Example)");
-		System.out.println("and jgachine://servername:port/example.Example for remote games");
+		System.out.println("Where uri is simply a class name for local games (f.e. tutorial.pong1.Pong)");
+		System.out.println("and jgachine://servername:port/tutorial.pong1.Pong for remote games");
 		return;
 	    }
 	// libgcj does not implement the uri yet (URL seems a bit strange...)

@@ -34,14 +34,15 @@ dnl checks for libraries
 
 dnl Figure out which math and opengl library to use
 dnl this is taken from SDL test directory
+dnl todo check for glu
 case "$target" in
     *-*-cygwin* | *-*-mingw32*)
 	TIMELIB="-lwinmm"
-        GL_LIB="-lopengl32"
+        GL_LIB="-lglu32 -lopengl32"
         ;;
     *)
 	TIMELIB=""
-	GL_LIB="-lGL"
+	GL_LIB="-lGLU -lGL"
         ;;
 esac
 
@@ -87,6 +88,7 @@ AC_CONFIG_FILES([
 	tutorial/demo/Makefile
 	tutorial/pong1/Makefile
 	tutorial/pong2/Makefile
+	tutorial/pong3/Makefile
 	tutorial/server/Makefile
 	org/Makefile
 	org/jgachine/Makefile
