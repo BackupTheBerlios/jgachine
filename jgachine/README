@@ -2,14 +2,18 @@ jgachine (java game machine)
 
 simple networked game engine for 2d multiplayer (networked) games
 
+
+********************************************************************************
 !!WARNING!!
 - This is work in progress 
 at the moment both server and client
 are a -->HIGH SECURITY RISK<-- (see also TODO)
 - don't run a server available to the public
 - don't connect to untrusted servers with the client!)
+********************************************************************************
 
-The Goal:
+
+The Goals:
 - easy game programing for beginners
   (no general purpose game engine)
 - a game machine/engine/browser
@@ -21,6 +25,12 @@ The Goal:
   => no file access, no network access (except to the server),
   .... 
 - writing multiplayer networked games within 2 hours
+
+
+
+
+QUICK START:
+================================================================================
 
 Build requirements:
 	Client:
@@ -46,8 +56,35 @@ Runtime requiremts:
   as the current implementation uses OpenGL - hardware acceleration is 
   (depending on the game/application) a must
 
+--------------------------------------------------------------------------------
+
+Compilation:
+
+make (perhaps set your CXXFLAGS, LDFLAGS, ...)
+
+Running the tutorials/examples: (without server)
+
+org/jgachine/JGachine tutorial.pong1.Pong
+org/jgachine/JGachine tutorial.pong2.Pong
+org/jgachine/JGachine example.Example
+
+With server:
+
+java -classpath .:server Server 34444
+org/jgachine/JGachine jgachine://localhost:34444/example.Example
 
 --------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+================================================================================
 Some thoughts mixed stuff .... sorry in german
 
 Ich wollte das ganze in Java machen mit RMI
