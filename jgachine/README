@@ -24,7 +24,7 @@ The Goal:
 
 Build requirements:
 	Client:
-	- gcc 3.x:
+	- gcc (gcj) 3.x:
 	  the client is written in java and c++ using gcc's CNI
 	  (cygnus native interface)
 	  => you need an up to date version of gcc (3.x)
@@ -65,7 +65,7 @@ Bei Python gäbe es mehrere Möglichkeiten:
 Das Problem bei Python ist dass es sich nicht so schoen wie java mit CNI mit
 c++ verbinden laesst
 im moment habe ich python doch wieder gestrichen v.a. da (byte-)code vom server auf 
-dem client ausführbar sein soll
+dem client ausführbar sein soll und das mit python nicht (sicher) geht?
 
 java suckt schon
 habe trotzdem weitergemacht
