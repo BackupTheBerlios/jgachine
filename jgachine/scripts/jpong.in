@@ -1,0 +1,2 @@
+#!/bin/sh
+CLASSPATH=@classdir@/pong.jar:@classdir@/vecmath.jar:@datadir@ exec jgachine tutorial.pong2.Pong

@@ -1,0 +1,13 @@
+This package contains code/data from:
+- GNU Classpath
+- javax.vecmath package by Kenji Hiranabe
+- the car.png from trophy (http://trophy.sourceforge.net)
+- dope and adic (my own ;-)
+- SDL http://libsdl.org
+- boost http://www.boost.org
+
+Please contact us if we missed something
+
+Thanks to:
+- mjw (first tester)
+
