@@ -331,3 +331,36 @@ entweder nach einer alternativen serialisierungsgeschichte suchen
 (habe ich schon angefangen - aber auf die schnelle nichts wirklich
 brauchbares gefunden - evtl. karmi - auf jedenfall eine gute
 problemanalyse)
+
+--------------------------------------------------------------------------------
+also
+serialisierung ist sack lam (gcc sogar 10* langsamer als sun jvm)
+=> entweder besserer/kleinere szenengraph
+oder doch java in den gulli kicken
+
+aber die liste von alternativen ist nicht lang
+habe gesucht
+gutes stichwort "mobile code"
+eigentlich geht es ja nur um einen simplen interpreter auf client seite
+da braucht es ja eigentlich nichts tolles
+evtl. ein kleines scheme/lua/javascript ..
+erlang mal anschauen
+habe aber definitiv keine lust einen weiteren dummen interpreter zu schreiben ;-)
+ausserdem soll es ja für anfänger geeignet sein
+
+
+--------------------------------------------------------------------------------
+hmm
+möchte doch so weiter machen
+kann halt nicht viel serialisiert werden
+=> szenengraph klein halten oder gleich ein intelligenteres protokoll
+implementieren
+
+jetzt mache ich erstmal das beispiel fertig
+--------------------------------------------------------------------------------
+
+okay
+meinen szenengraph ist jetzt fast minimal
+root node 2 racket nodes ein ball node
+deserialisieren dauert immernoch 1sec. !!
+=> völlig unbrauchbar

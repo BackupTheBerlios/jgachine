@@ -66,17 +66,18 @@ class RacketMover
   we now have the physics of the racket right
   but of course we must paint it
 */
-class RacketSprite extends Node
+class RacketSprite extends Node implements Serializable
 {
-    RacketSprite(Vector2f _pos, Color color) throws java.io.IOException
+    RacketSprite(Vector2f _pos, Color _color) throws java.io.IOException
     {
 	pos = _pos;
-	this.addNode(new Translate(pos).addNode(new Scale(size).addNode(new Recolor(color).addNode(new Sprite("data:car.png")))));
+	color = _color;
     }
 
     Vector2f pos;
-
-    static Vector2f size=new Vector2f(64,64);
+    Color color;
+    final static Vector2f size=new Vector2f(64,64);
+    final static String resname="data:car.png";
 }
 
 //! a ball
@@ -155,23 +156,29 @@ class Ball
   we now have the physics of the ball right
   but of course we must paint it
 */
-class BallSprite extends Node
+class BallSprite extends Node implements Serializable
 {
     BallSprite(Vector2f _pos) throws java.io.IOException
     {
 	pos = _pos;
-
-	// node which draws rotated and scaled sprite
-	Node ball=new Translate(pos);
-	rotate = new Rotate();
-	this.addNode(ball.addNode(rotate.addNode(new Scale(size).addNode(new Sprite("data:ball.png")))));
+	rotate = 0;
     }
 
-    Rotate rotate;
     Vector2f pos;
+    float rotate;
 
-    static Vector2f size=new Vector2f(64,64);
+    final static Vector2f size=new Vector2f(64,64);
+    final static String resname="data:ball.png";
 }
+
+
+class RootNode extends Node implements Serializable
+{
+    final static Vector2f assumedScreenSize=new Vector2f(1024,768);
+    //! background resource name
+    final static String bgResName="data:back.jpg";
+}
+
 
 //! simple pong clone
 /*!
@@ -220,15 +227,8 @@ public class Pong implements Runnable
     {
 	// create sceneGraph
 
-	// our scene graph root Node
-	Node sceneGraph = new Node();
-
-	// set up camera
-	Camera camera = new Camera(new Vector2f(1024/2,768/2));
-
-	// add background
-	sceneGraph
-	    .addNode(camera.addNode(new Scale(new Vector2f(1024,1024)).addNode(new Sprite("data:back.jpg"))));
+	// set up camera - this is also our scene graph root Node
+	RootNode root = new RootNode();
 
 	// add rackets
 	for (int i=0;i<racket.length;++i) {
@@ -237,23 +237,24 @@ public class Pong implements Runnable
 	    float r=( i   %3)!=0 ? 0.6f:1.0f;
 	    float g=((i+1)%3)!=0 ? 0.4f:1.0f;
 	    float b=((i+2)%3)!=0 ? 0.6f:1.0f;
-	    camera.addNode(new RacketSprite(racket[i].pos,new Color(r,g,b,1.0f)));
+	    root.addNode(new RacketSprite(racket[i].pos,new Color(r,g,b,1.0f)));
 	}
 
 	// add ball
 	Ball ball = new Ball();
 	BallSprite ballSprite = new BallSprite(ball.pos);
-	camera.addNode(ballSprite);
+	root.addNode(ballSprite);
 
 	// add point displays
 	pointsText = new Text[2];
 	pointsText[0]=new Text("00");
 	pointsText[1]=new Text("00");
 
-	camera
+	/*
+	root
 	    .addNode(new AdjustColor(new Color(1.0f,0.4f,0.6f,0.9f)).addNode(new Translate(new Vector2f(-1024/2   ,768/2-32-5)).addNode(new Scale(new Vector2f(32.0f,32.0f)).addNode(pointsText[0]))))
 	    .addNode(new AdjustColor(new Color(0.6f,0.4f,1.0f,0.9f)).addNode(new Translate(new Vector2f( 1024/2-64,768/2-32-5)).addNode(new Scale(new Vector2f(32.0f,32.0f)).addNode(pointsText[1]))));
-	
+	*/
 
 	long start = System.currentTimeMillis();
 	long last = start;
@@ -276,9 +277,9 @@ public class Pong implements Runnable
 		racket[i].step(fdt);
 	    // move ball
 	    ball.step(fdt);
-	    ballSprite.rotate.r=ball.dir;
+	    ballSprite.rotate=ball.dir;
 
-	    Server.broadcast(sceneGraph);
+	    Server.broadcast(root);
 	    ++frame;
 	    cur = System.currentTimeMillis();
 	    dt = cur - last;

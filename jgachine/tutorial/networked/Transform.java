@@ -74,6 +74,35 @@ public class Transform
 	return r;
     }
 
+    static public org.jgachine.scenegraph.Node t(tutorial.networked.RacketSprite n) 
+	throws java.lang.reflect.InvocationTargetException, java.io.IOException
+    {
+	return new org.jgachine.scenegraph.Translate(n.pos)
+	    .addNode(new org.jgachine.scenegraph.Scale(n.size)
+		     .addNode(new org.jgachine.scenegraph.Recolor(n.color)
+			      .addNode(new org.jgachine.scenegraph.Sprite(n.resname))));
+    }
+
+    static public org.jgachine.scenegraph.Node t(tutorial.networked.BallSprite n) 
+	throws java.lang.reflect.InvocationTargetException, java.io.IOException
+    {
+	return new org.jgachine.scenegraph.Translate(n.pos)
+	    .addNode(new org.jgachine.scenegraph.Rotate(n.rotate)
+		     .addNode(new org.jgachine.scenegraph.Scale(n.size)
+			      .addNode(new org.jgachine.scenegraph.Sprite(n.resname))));
+    }
+
+    static public org.jgachine.scenegraph.Node t(tutorial.networked.RootNode n) 
+	throws java.lang.reflect.InvocationTargetException, java.io.IOException
+    {
+	float bgSize=Math.max(n.assumedScreenSize.x,n.assumedScreenSize.y);
+	Vector2f screenMiddle=new Vector2f(n.assumedScreenSize);
+	screenMiddle.scale(0.5f);
+	return new org.jgachine.scenegraph.Camera(screenMiddle)
+	    .addNode(new org.jgachine.scenegraph.Scale(new Vector2f(bgSize,bgSize))
+		     .addNode(new org.jgachine.scenegraph.Sprite(n.bgResName)));
+    }
+
     static protected void debug(String s){
 	System.out.println("Transform.java: "+s);
     }

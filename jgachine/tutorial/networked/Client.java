@@ -40,7 +40,7 @@ public class Client implements Runnable
 	JGachine.sendObject(s);
     }
 
-    public void handleSceneGraph(org.jgachine.dscenegraph.Node node)
+    public void handleSceneGraph(tutorial.networked.RootNode node)
 	throws java.lang.reflect.InvocationTargetException
     {
 	debug("transform scenegraph");

@@ -208,7 +208,9 @@ public class JGachine {
 	long t1=JGachine.time();
 	Object obj = objIn.readObject();
 	long t2=JGachine.time();
-	input.dispatch(obj);
+	if (!input.dispatch(obj)) {
+	    debug("Object not handled. Type: "+obj.getClass().getName());
+	}
 	long t3=JGachine.time();
 	debug("deserialize: "+(t2-t1)+"usec, dispatch: "+(t3-t2)+"usec");
     }
