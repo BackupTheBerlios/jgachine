@@ -364,3 +364,14 @@ meinen szenengraph ist jetzt fast minimal
 root node 2 racket nodes ein ball node
 deserialisieren dauert immernoch 1sec. !!
 => völlig unbrauchbar
+
+ich könnte noch probieren den ObjectOutputStream nicht jedesmal
+zu resetten
+da in dem karmi beschrieben wird dass dann mehr geresettet wird
+als ich wirklich will
+okay das bringt es auch nicht wegen dem Aufwand fürs clonen
+
+=> bleibt nur noch zu testen ob die serialisierungsgeschichten
+wesentlich schneller werden wenn man die writeObject und
+readObject Methoden selber implementiert
+oder nochmal das karmi zeugs anschauen

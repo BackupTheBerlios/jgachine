@@ -89,11 +89,36 @@ public class ServerThread extends Thread {
 	throws java.io.IOException
     {
 	debug("sendObject"+obj.getClass().getName());
-	objOut.writeObject(obj);
+
+	/*
+	  the idea was to not always reset the stream
+	  and then instead to send a copy of the object
+	  to send (i wanted to do this because reset
+	  does more than we need - see karmi paper
+	  about slow java serialization)
+
+	  but then unfortunately all classes to send
+	  would have to implement the Clonable interface
+	  of course we could fallback if they do not
+	  but to implement the Clonable interface is at
+	  least as "difficult" as to write our own
+	  serialization methods
+
+	  if ((objectsSent%100)!=0)
+	  objOut.writeObject(obj.clone());
+	  else{
+	  objOut.reset();
+	  objOut.writeObject(obj);
+	  }
+	  objOut.flush();
+	  objectsSent++;
+	*/
+
 	// otherwise if writing the same object again modifications will not
 	// be written
 	// s.a.: http://java.sun.com/products/jdk/serialization/faq/#handle
 	objOut.reset();
+	objOut.writeObject(obj);
 	objOut.flush();
     }
 
@@ -101,6 +126,7 @@ public class ServerThread extends Thread {
 	System.out.println("ServerThread.java: "+s);
     }
     static Class ResReqClass;
+    private int objectsSent=0;
 }
 
 
