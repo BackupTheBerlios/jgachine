@@ -9,11 +9,11 @@ import org.jgachine.event.*;
 //! simple game engine
 public class JGachine {
     // info
-    //! get current width of window
+    //! get current width of video screen
     static public int getWidth() {
 	return width;
     }
-    //! get current height of window
+    //! get current height of video screen
     static public int getHeight() {
 	return height;
     }
@@ -192,8 +192,8 @@ public class JGachine {
     static protected ObjectInputStream objIn;
     static protected ObjectOutputStream objOut;
     static protected boolean runCalled=false;
-    static protected int width;
-    static protected int height;
+    static protected int width=0;
+    static protected int height=0;
     static protected ResourceLoader resourceLoader;
 }
 

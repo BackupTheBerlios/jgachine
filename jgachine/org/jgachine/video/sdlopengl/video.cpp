@@ -34,11 +34,6 @@ void ShowError(const char *title, const char *message)
 
 #endif
 
-
-
-static int m_width;
-static int m_height;
-static unsigned m_flags;
 static bool m_lineSmooth=true;
 
 typedef std::vector<DOPE_SMARTPTR<Texture> > Textures;
@@ -57,6 +52,8 @@ static
 void
 motionBlur()
 {
+  int m_width=SDL_GetVideoSurface()->w;
+  int m_height=SDL_GetVideoSurface()->h;
   // motion blur
   Color tmp(getColor());
   glColor4f(1.0f,1.0f,1.0f,0.3f);
@@ -97,67 +94,61 @@ motionBlur()
 
 #endif
 
-static 
-void
-resize(int width, int height)		
+static
+bool
+isFullscreen()
 {
-  // Prevent A Divide By Zero By
-  if (width==0)
-    width=1;
-  if (height==0)			
-    height=1;
+  SDL_Surface* video;
+  video=SDL_GetVideoSurface();
+  assert(video);
+  return (video->flags)&SDL_FULLSCREEN;
+}
 
-  if ( SDL_SetVideoMode(width, height, 0, m_flags) == NULL ) {
+static
+void
+setMouseCursor()
+{
+  if (isFullscreen())
+    SDL_ShowCursor(SDL_DISABLE);
+  else
+    SDL_ShowCursor(SDL_ENABLE);
+}
+
+
+static
+void resize(int width, int height, int m_flags)
+{
+  SDL_Surface* video;
+  
+  // Prevent A Divide By Zero By
+  if (width==0) width=1;
+  if (height==0) height=1;
+
+  if (!(video=SDL_SetVideoMode(width, height, 0, m_flags))) {
     DOPE_WARN(SDL_GetError());
     throw std::runtime_error(std::string("Couldn't set video mode: ")+SDL_GetError());
   }
 
-  // hack for 8bit displays (especially for my sdl+osmesa+aalib and sdl+osmesa+fbcon hack)
-  if (SDL_GetVideoSurface()->format->BitsPerPixel == 8) {
-    SDL_Color colors[256];
-    int i;
-    //    int c=0;
-    for(i=0;i<256;i++){
-      colors[i].r=i; //(c&0xff0000)>>16;
-      colors[i].g=i; //(c&0x00ff00)>>8;
-      colors[i].b=i; //c&0x0000ff;
-      //      c+=(0xffffff)>>8;
-    }
-    SDL_SetPalette(SDL_GetVideoSurface(), SDL_LOGPAL|SDL_PHYSPAL, colors, 0, 256);
-  }
-  char *caption="JGachine";
-  SDL_WM_SetCaption(caption,caption);
-  if (m_flags&SDL_FULLSCREEN)
-    SDL_ShowCursor(SDL_DISABLE);
-  else
-    SDL_ShowCursor(SDL_ENABLE);
-  m_width=width;
-  m_height=height;
+  // reset view port
+  glViewport(0,0,video->w,video->h);
 
-  int db=0;
-  if (SDL_GL_GetAttribute( SDL_GL_DOUBLEBUFFER, &db )) DOPE_WARN("could not get attribute");
-  if (!db) DOPE_WARN("did not get double buffer");
-
-  // Reset The Current Viewport
-  glViewport(0,0,width,height);
-  GL_ERRORS();
-  // Select The Projection Matrix
+  // set up cordinate system
   glMatrixMode(GL_PROJECTION);		
-  GL_ERRORS();
   glLoadIdentity();
+  glOrtho(0.0f,video->w,0.0f,video->h,-100.0f,100.0f);
+
   GL_ERRORS();
-  glOrtho(0.0f,width,0.0f,height,-100.0f,100.0f);
-  GL_ERRORS();
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  GL_ERRORS();
-  glClear(GL_COLOR_BUFFER_BIT);
+
   glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glColor3f(1.0,1.0,1.0);
+}
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+void
+Video::resize(int width, int height)		
+{
+  SDL_Surface* video=SDL_GetVideoSurface();
+  if (!video) return;
+  ::resize(width,height,video->flags);
 }
 
 static
@@ -176,11 +167,46 @@ static
 void
 createWindow() 
 {
-  m_flags = SDL_OPENGL|SDL_FULLSCREEN;
-  //  m_flags = SDL_OPENGL|SDL_RESIZABLE;
   SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-  resize(1024,768);
+  ::resize(1024,768,SDL_OPENGL|SDL_FULLSCREEN|SDL_RESIZABLE);
+
+  // hack for 8bit displays (especially for my sdl+osmesa+aalib and sdl+osmesa+fbcon hack)
+  if (SDL_GetVideoSurface()->format->BitsPerPixel == 8) {
+    SDL_Color colors[256];
+    int i;
+    //    int c=0;
+    for(i=0;i<256;i++){
+      colors[i].r=i; //(c&0xff0000)>>16;
+      colors[i].g=i; //(c&0x00ff00)>>8;
+      colors[i].b=i; //c&0x0000ff;
+      //      c+=(0xffffff)>>8;
+    }
+    SDL_SetPalette(SDL_GetVideoSurface(), SDL_LOGPAL|SDL_PHYSPAL, colors, 0, 256);
+  }
+
+  // set window title (if there is a window)
+  char *caption="JGachine";
+  SDL_WM_SetCaption(caption,caption);
+
+  setMouseCursor();
+
+  int db=0;
+  if (SDL_GL_GetAttribute( SDL_GL_DOUBLEBUFFER, &db )) DOPE_WARN("could not get attribute");
+  if (!db) DOPE_WARN("did not get double buffer");
+
+
+
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  GL_ERRORS();
+  glClear(GL_COLOR_BUFFER_BIT);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glColor3f(1.0,1.0,1.0);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  GL_ERRORS();
+
 
   glDisable(GL_NORMALIZE);
   GL_ERRORS();
@@ -202,8 +228,6 @@ createWindow()
   glShadeModel(GL_FLAT);
   GL_ERRORS();
 
-  GL_ERRORS();
-  
   //  if (getGUIConfig().quality<=1) {glDisable(GL_DITHER);GL_ERRORS();}
 }
 
@@ -406,7 +430,7 @@ Video::toggleFullscreen()
   SDL_Surface *screen = SDL_GetVideoSurface();
   if (!screen) return;
   if (SDL_WM_ToggleFullScreen(screen)) {
-    //  bool fullscreen=screen->flags&SDL_FULLSCREEN;
+    setMouseCursor();
   } else {
     // printf("Unable to toggle fullscreen mode\n");
   }

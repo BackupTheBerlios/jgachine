@@ -61,9 +61,28 @@ Input::devStateHandler(const Input::DevState& state)
   org::jgachine::JGachine::input->dispatch(s);
 }
 
+//! input layer calls this if we should resize (f.e. the input layer got a message from a window manager)
 void
 Input::resizeHandler(int sx, int sy)
 {
+  // resize neccessary? prevent possible endless loop where video subsystem generates input event
+  // hmm still shit but i will not implement a work-around (skip all events until we get one we expect from
+  // our resize)
+  // the (sdlopengl) video subsystem generates resize requests - this is a real problem with wm's like sawfish....
+  // corresponding discussion on SDL ML: http://www.libsdl.org/pipermail/sdl/2003-July/thread.html#55073
+  // Idea: perhaps sawfish does also react on application requested resizes and tries to resize
+  // to the application requested size in small steps, too - hmm (this would explain the alternating resizes)
+  // 1. test with different wm's
+  // 2. take a look at the sawfish source
+  // 3. how did I do it in TUD? / read the Xlib manual
+  // 4. read the SDL source
+  if ((sx==org::jgachine::JGachine::width)&&(sy==org::jgachine::JGachine::height))
+    return;
+
+  // tell the video layer to actually resize
+  Video::resize(sx,sy);
+
+  // now tell the jgachine applications that we resized
   org::jgachine::JGachine::width=sx;
   org::jgachine::JGachine::height=sy;
   org::jgachine::event::Resize* e=new org::jgachine::event::Resize(sx,sy);
@@ -84,7 +103,7 @@ org::jgachine::JGachine::init()
   assert(!colorStack);
   colorStack=new ColorStack();
 
-  // at the moment video must always be initialized first
+  // at the moment video must always be initialized first (this is caused by the sdlopengl video implementation)
   Video::init();
   Input::init();
 }

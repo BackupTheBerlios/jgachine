@@ -1,0 +1,2 @@
+- security: client and server are completely insecure
+- resize: problems with sawfish (for details see JGachineNative.cpp)

@@ -11,6 +11,7 @@ namespace Video
 
   void toggleFullscreen();
   void iconify();
+  void resize(int sx, int sy);
   
   void drawLine(int x1,int y1,int x2,int y2);
   void swapBuffers();
