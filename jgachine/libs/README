@@ -1,0 +1,6 @@
+The are the libraries I linked against
+If you run ./JGachine and there are missing libraries create a directory and put
+the libraries missing in there. Then add the directory to LD_LIBRARY_PATH
+(see man ld)
+
+you must have a working libGL.so.

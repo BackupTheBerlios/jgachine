@@ -1,0 +1,123 @@
+jgachine (java game machine)
+
+simple networked game engine for 2d multiplayer (networked) games
+
+!!WARNING!!
+- This is work in progress 
+at the moment both server and client
+are a -->HIGH SECURITY RISK<-- (see also TODO)
+- don't run a server available to the public
+- don't connect to untrusted servers with the client!)
+
+The Goal:
+- easy game programing for beginners
+  (no general purpose game engine)
+- a game machine/engine/browser
+- one client for multiple games
+- you only write the game server (though the server may
+  send bytecode to the client)
+- secure client (though executing bytecode from the server
+  - security concepts similar to java browser applets
+  => no file access, no network access (except to the server),
+  .... 
+- writing multiplayer networked games within 2 hours
+
+Build requirements:
+	Client:
+	- gcc 3.x:
+	  the client is written in java and c++ using gcc's CNI
+	  (cygnus native interface)
+	  => you need an up to date version of gcc (3.x)
+	- OpenGL/Mesa:
+	  current video implementation uses OpenGL
+	- SDL:
+	  current video and input implementation use SDL
+	- SDL_image:
+	  current video implementation uses SDL_image for texture loading
+
+	Server: (of course you don't have to use the included server)
+	- some java compiler and vm (gcj and libgcj is fine - ver. 3.x)
+	  the server and the examples are pure java => any java compiler/vm should do it
+	  (currently only tested with gcj)
+
+Runtime requiremts:
+- to play games you only need the client
+  (in the moment there aren't any binaries for download)
+  as the current implementation uses OpenGL - hardware acceleration is 
+  (depending on the game/application) a must
+
+
+--------------------------------------------------------------------------------
+Some thoughts mixed stuff .... sorry in german
+
+Ich wollte das ganze in Java machen mit RMI
+leider ist die beim gcc die RMI Unterstuetzung noch unbrauchbar
+(update: laut docu geht es ab 3.3? TODO: testen aber ich denke
+RMI ist nicht genau das was ich brauche...nur eine socket verb.
+kein dummer daemon...)
+und JAVA ist eh Dreck => ich suche nach einem anderen Weg
+evtl. Python ? naja so schlimm ist java auch wieder nicht ;-)
+
+Bei Python gäbe es mehrere Möglichkeiten:
+- corba (viele Implementierungen - evtl. fnorb ?)
+- twisted - sieht gut aus (bei debian mit bei!)
+- pyro ?
+Das Problem bei Python ist dass es sich nicht so schoen wie java mit CNI mit
+c++ verbinden laesst
+im moment habe ich python doch wieder gestrichen v.a. da (byte-)code vom server auf 
+dem client ausführbar sein soll
+
+java suckt schon
+habe trotzdem weitergemacht
+(das schöne an java wäre eben, daß man "sicher" code auf dem client ausführen könnte
+- und somit der client flexibler wäre - allerdings scheint es mit der sicherheit beim
+gcj java nicht weit her zu sein ...)
+eigentlich müsste ich erst den native code schreiben
+dann automatisch java wrapper generieren
+ansonsten muss ich soviel doppelt machen
+
+das eigentliche "problem" ist opengl ist toll
+ich würde halt nen szenengraphen drumrumbauen
+aber das ganze soll ja einfach werden
+und wenn ich radikal auf opengl aufbaue werden alternative implementierungen
+schwierig
+die frage ist wie sehr kann man es vereinfachen ohne zu viel mächtigkeit zu verlieren
+
+die idee war ja schon was zu machen mit dem man innerhalb von einigen stunden ein
+multiplayer-netzwerk spiel schreiben kann
+
+design-entscheidungen:
+szenengraph + opengl orientiert: ja
+device unabhängige koordinaten: ja, nein? ;-) beides
+anfängertauglich: ja
+
+wenn ich mich stark an opengl orientiere - läuft es darauf hinaus
+dass ich einen weiteren java opengl wrapper schreibe => dumm
+=> erstmal schauen ob es nicht einen gibt der was taugt und
+open source ist
+wobei naja - ich brauche ja wirklich nur ein geringes subset
+vielleicht sollte ich als erstes dieses definieren
+--------------------------------------------------------------------------------
+Gelöste Probleme:
+- die klasse die an den client gesendet wird muß auf den client
+  zugreifen können also auf JGachine, wie mache ich das?
+  beim compilieren muss halt die JGachine-Klasse verfügbar sein
+
+- ich habe jetzt packete verwendet
+	wegen folgendem code:
+	defineclass.cc:
+	  // if it has package scope, it must also be defined by the 
+	  // same loader.
+	  if ((super->accflags & Modifier::PUBLIC) == 0)
+	    {
+	      if (    sub->loader != super->loader
+	          || !_Jv_ClassNameSamePackage (sub->name, super->name))
+	        {
+	          throw_incompatible_class_change_error (sub->getName ());
+	        }
+	    } 
+
+-  createInstance funktionierte nicht
+	die probleme waren nicht public methoden/member
+	leider sind die fehlermelgungen nicht aussagekräftig gewesen
+

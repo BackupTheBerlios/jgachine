@@ -1,0 +1,4 @@
+optional scenegraph
+i moved it to the client side for performance reasons, especially if compiled to native code 
+which is default since on client side you need native code anyway (for now...)
+

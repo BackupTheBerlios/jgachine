@@ -1,0 +1,38 @@
+2003-11-11  Jens Thiele  <karme@berlios.de>
+
+	* added simple pong game
+
+	* started tutorial
+	
+
+2003-11-10  Jens Thiele  <karme@berlios.de>
+
+	* tested Server with sun's jre 1.4.2 - and it works!
+
+	* cleaned up Makefiles a bit
+
+	* cleaned up the resource stuff a bit
+
+	* input now uses signal/slot
+	=> may lead to runtime errors but very flexible
+	(methods can't be fetched at compile time)
+	=> we can add new input events without changing the API
+	and breaking compatibility - well old jgachines will
+	not report new events and old games will not handle
+	new events - depending on the events this could be no
+	problem
+
+2003-11-09  Jens Thiele  <karme@berlios.de>
+
+	* simple signal/slot implementation
+
+	* client may now be used standalone (without server)
+
+2003-11-03  Jens Thiele  <karme@berlios.de>
+
+	* first demo works
+
+2003-10-31  Jens Thiele  <karme@berlios.de>
+
+	* project started
+

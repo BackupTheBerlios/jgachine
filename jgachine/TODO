@@ -1,0 +1,102 @@
+ - security: client and server are completely insecure !!
+	client: improve MySecurityManager
+	server: either add a SecurityManager or at least fix the
+		file/resource upload 
+		(perhaps simply use http for this - problem: then you
+		must keep your server code in sync with the code you
+		serv via http... not a real problem is it?
+		many people do not have a http server - perhaps ship
+		with a minimalistic one => the same security problems
+		again;-)
+- input: 
+	buttons
+	user definable keys
+
+- networking: 
+	flush!!
+	distributed scene graph (is it possible to do a general one
+	working good enough for interactive realtime games?)
+
+	synchronous vs. asynchronous vs. both handling:
+		completely asynchronous:
+			simple to implement but difficult to use
+		completely synchronous:
+			simple to implement but introduces
+			unneccessary lag
+		both:
+			handle manually: difficult to use
+			automatic: difficult to implement
+
+	server: make base code optinal part of jgachine?
+		threading issues
+	NetResourceLoader:
+		todo: in the moment only one outstanding resource
+		request permitted
+
+- sound: completely missing
+
+- video:
+	* better font / or better text handling in general
+	* performance: in the moment we assume hardware accelerated OpenGL 
+	  is available (premature optimization is ...)
+	* sdlopengl: in the moment we have GL_BLEND always on
+	  (this causes a big slowdown at least with my gf2 mx -
+	   switch it on/off as needed)
+	* motion blur:
+		okay i did a fullscreen motion blur with glCopyTexSubImage2D
+		that does not need any user interaction
+		what is bad with it?
+		the last frame drawn is blended with old frames
+		=> everything is smooth => not what I want
+		I want the last "frame" sharp ... bad explanation...
+		I want to only blur moving objects but the current position is
+		not blended/blured. => it must be differentiated between the changing
+		screen area and unchanging or better between moving objects and background
+		the latter would require the user to specify this
+		it could be done using the depth buffer which i did not use so far at all
+		another possibility would be to do it with the scenegraph manually
+		for now i disable motion blur
+		btw could have done the same effect in a much simpler way:
+			don't clear the framebuffer
+			(perhaps copy front to back buffer)
+			draw scene alpha blended
+		the tutorial (pong) does motion blur manually now
+
+- scenegraph:
+	perhaps it is a bad idea to use subclasses, better use interfaces?
+	add some useful stuff like menus / animations / ...
+
+- build:
+	the makefiles suck (you often have to make twice and make clean)
+	perhaps use autoconf again
+	create portable binaries (just read about lsb tools....):
+		this time i will not build static/semi-static ones
+		=> i could remove my dlopen opengl stuff from the video part
+		(but i used this to get mesa offscreen working on framebuffer...)
+		ship with libraries and set LD_LIBRARY_PATH (perhaps optional...)
+
+	cross-compile to windows with mingw
+- signal:
+	at the moment only one object may be passed to a slot (signal consists of
+	one object)
+	but the server could use arrays (methods with multiple parameters 
+	=> slots with multiple objects)
+
+- tutorial:
+	started with a pong
+
+- scheduling:
+	still sucks
+	linux kernel 10ms (2.4)
+	perhaps test 2.6 ;-)
+	java increases the problem with its garbage collector
+	nvidia's drivers do a busy loop while waiting for retrace
+		(at least up to version 1.0-4191)
+	with motion blur one can sleep for a long time
+	=> will not get interrupted that often and it looks great anyway
+	(but perhaps this is a matter of taste)
+	
+--------------------------------------------------------------------------------
+was ich probieren wollte:
+der classloader auf client seite laedt die class objekte einfach
+ueber den objectstream
