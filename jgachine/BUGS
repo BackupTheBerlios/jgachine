@@ -1,3 +1,4 @@
 - security: client and server are completely insecure
 - resize: problems with sawfish (for details see JGachineNative.cpp)
-- xinerama fullscreen does not work
+- xinerama fullscreen does not work (this seems to be a bug in SDL)
+
