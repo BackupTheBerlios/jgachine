@@ -6,7 +6,7 @@ export srcdir
 CXXFLAGS+=-I$(srcdir) -I$(srcdir)/vecmath
 CLASSPATH+=$(srcdir):$(srcdir)/vecmath:
 
-export CLASSPATH
+export CXXFLAGS CLASSPATH
 
 SUBDIRS = example server vecmath org/jgachine tutorial
 
